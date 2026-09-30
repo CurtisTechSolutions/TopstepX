@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0](https://github.com/CurtisTechSolutions/TopstepX/compare/v1.0.0...v1.0.0) (2026-09-30)
+
+
+### Build System
+
+* prepare the SDKs for their first registry release ([#9](https://github.com/CurtisTechSolutions/TopstepX/issues/9)) ([c315185](https://github.com/CurtisTechSolutions/TopstepX/commit/c31518574b92b1d03376287b0eef53d71bc0994a))
+
 ## 1.0.0 (2026-09-30)
 
 
