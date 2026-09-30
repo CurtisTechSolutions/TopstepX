@@ -20,6 +20,7 @@ code that differs between them.
 
 from __future__ import annotations
 
+import dataclasses
 import itertools
 import logging
 import threading
@@ -30,7 +31,14 @@ from typing import Any, Protocol, TypeVar, cast
 
 import httpx
 
-from ._auth import Credentials, Session, TokenAction, new_session, plan_token
+from ._auth import (
+    RENEWAL_COOLDOWN,
+    Credentials,
+    Session,
+    TokenAction,
+    new_session,
+    plan_token,
+)
 from ._config import USER_AGENT, ClientSettings
 from ._ratelimit import RateLimiter
 from ._retry import RETRYABLE_READ_STATUSES, is_retryable_transport_error, parse_retry_after
@@ -306,6 +314,21 @@ class ClientCore:
         with self._session_lock:
             self._session = None
 
+    def block_renewal(self, session: Session) -> Session:
+        """Start the renewal cooldown for ``session`` if it is still the stored one.
+
+        Returns the session to keep using.
+        """
+        with self._session_lock:
+            current = self._session
+            if current is None or current.generation != session.generation:
+                return current if current is not None else session
+            blocked = dataclasses.replace(
+                current, renewal_blocked_until=self.clock() + RENEWAL_COOLDOWN
+            )
+            self._session = blocked
+        return blocked
+
     def invalidate_token(self, token: str) -> bool:
         """Forget the stored token if it is still ``token``; return whether it was."""
         with self._session_lock:
@@ -499,10 +522,12 @@ class ClientCore:
                 logger.info("Token refresh failed (%s); logging in again", type(exc).__name__)
                 return (yield from self._login_with_credentials())
             logger.warning(
-                "Token refresh failed (%s); continuing with the current token",
+                "Token refresh failed (%s); continuing with the current token and "
+                "not retrying the refresh for %g s",
                 type(exc).__name__,
+                RENEWAL_COOLDOWN,
             )
-            return session
+            return self.block_renewal(session)
         logger.debug("Token renewed through Auth_Validate")
         return self.store_token(new_token)
 

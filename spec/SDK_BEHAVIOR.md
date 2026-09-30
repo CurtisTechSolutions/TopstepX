@@ -138,6 +138,11 @@ absent arrays decode as "none" or empty. The body is parsed as JSON whatever the
 
   Refreshes are **single-flight**. Concurrent callers wait for one refresh or login
   instead of stampeding.
+- **Renewal cooldown**: when renewal fails and the SDK keeps using the current token (step
+  3 without credentials), it does not call `validate` again for **60 seconds**. The token
+  is used as-is until the cooldown ends or the token expires. Storing any new token clears
+  the cooldown. Without it, every request in the last hour would first make a failing
+  `validate` call.
 - **HTTP 401 on an authenticated request**: if credentials are configured and this
   request has not already been retried for a 401, log in again and retry the request once.
   If another caller replaced the token in the meantime, retry with that token instead of

@@ -30,6 +30,8 @@ pub const DEFAULT_MARKET_HUB_URL: &str = "https://rtc.topstepx.com/hubs/market";
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(30);
 const DEFAULT_CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 const DEFAULT_REFRESH_MARGIN: Duration = Duration::from_secs(60 * 60);
+/// Pause after a failed renewal that keeps the current token (`spec/SDK_BEHAVIOR.md` §5).
+const RENEWAL_COOLDOWN: chrono::TimeDelta = chrono::TimeDelta::seconds(60);
 
 /// Async client for the gateway's REST API.
 ///
@@ -303,7 +305,14 @@ impl Client {
                         self.login_locked(credentials).await
                     }
                     None => {
-                        tracing::warn!(%error, "token renewal failed; using the current token until it expires");
+                        tracing::warn!(
+                            %error,
+                            "token renewal failed; using the current token and retrying renewal in {}s",
+                            RENEWAL_COOLDOWN.num_seconds()
+                        );
+                        self.inner
+                            .session
+                            .pause_renewal(state.generation, Utc::now() + RENEWAL_COOLDOWN);
                         Ok(state)
                     }
                 },

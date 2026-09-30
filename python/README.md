@@ -112,6 +112,12 @@ API keys and tokens are secrets: they never appear in `repr`, exception messages
      failure log in (credentials) or keep using the still-valid token;
   4. otherwise use the stored token.
 
+  **Renewal cooldown:** when renewal fails and the client keeps the current token (no
+  credentials), it does not call `Auth_Validate` again for 60 seconds; the token is used
+  as-is until the cooldown ends or the token expires. Storing any new token clears the
+  cooldown. (Without it, every request in the last hour would first make a failing
+  `validate` call.)
+
   Refreshes and logins are **single-flight**: concurrent callers (threads or tasks) wait for
   one refresh instead of stampeding.
 - **HTTP 401** on an authenticated request: with credentials, log in again and retry the
