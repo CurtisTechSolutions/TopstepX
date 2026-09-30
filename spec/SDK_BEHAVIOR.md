@@ -372,8 +372,11 @@ directly, without depending on a SignalR library:
   reconnect the client replays the registry in insertion order, then emits *reconnected*.
   A failed replay is surfaced as an event, not swallowed. Invocations while disconnected
   fail fast with a *not connected* error.
-- **State events**: *connected*, *reconnecting* (attempt number and cause), *reconnected*
-  and *closed* (cause) are delivered in the same stream as data events.
+- **State events**: *reconnecting* (attempt number and cause), *reconnected* and *closed*
+  (cause) are delivered in the same stream as data events.
+  - Callback-style APIs registered before connecting also report *connected*.
+  - A pull-style stream is created after the connect call returns, so it may treat that
+    successful return as the *connected* signal instead of emitting an event.
 - **Backpressure**: event delivery never blocks the read loop or keepalive. A consumer
   that falls behind loses events, and the SDK makes the loss observable through a lag
   error, a dropped counter or a log line.
