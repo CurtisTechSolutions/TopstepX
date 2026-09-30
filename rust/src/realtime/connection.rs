@@ -59,7 +59,9 @@ struct Socket {
 }
 
 /// Builds the WebSocket URL: `https` becomes `wss`, `http` becomes `ws`, and the token is
-/// appended as `access_token`.
+/// set as `access_token`, replacing one already in the configured URL (the official guide
+/// builds hub URLs as `...?access_token=` + token, and two values would reach the server as
+/// one comma-joined token).
 fn websocket_url(hub: &Url, token: &str) -> Result<Url, RealtimeError> {
     let mut url = hub.clone();
     let scheme = match url.scheme() {
@@ -69,7 +71,15 @@ fn websocket_url(hub: &Url, token: &str) -> Result<Url, RealtimeError> {
     };
     url.set_scheme(scheme)
         .map_err(|()| RealtimeError::Url(format!("cannot use scheme `{scheme}`")))?;
-    url.query_pairs_mut().append_pair("access_token", token);
+    let retained: Vec<(String, String)> = url
+        .query_pairs()
+        .filter(|(key, _)| key != "access_token")
+        .map(|(key, value)| (key.into_owned(), value.into_owned()))
+        .collect();
+    url.set_query(None);
+    url.query_pairs_mut()
+        .extend_pairs(retained)
+        .append_pair("access_token", token);
     Ok(url)
 }
 
@@ -724,6 +734,11 @@ mod tests {
         assert_eq!(
             websocket_url(&local, "t").unwrap().as_str(),
             "ws://127.0.0.1:5000/hubs/market?x=1&access_token=t"
+        );
+        let stale = Url::parse("https://host/hubs/user?access_token=old&x=1").unwrap();
+        assert_eq!(
+            websocket_url(&stale, "new").unwrap().as_str(),
+            "wss://host/hubs/user?x=1&access_token=new"
         );
         assert!(websocket_url(&Url::parse("ftp://host/hub").unwrap(), "t").is_err());
         assert_eq!(hub_label(&url), "wss://rtc.topstepx.com/hubs/user");

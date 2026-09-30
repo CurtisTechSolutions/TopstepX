@@ -342,8 +342,11 @@ A malformed or unexpected payload must never break the connection:
 The client implements the ASP.NET Core SignalR **JSON hub protocol v1** over WebSockets
 directly, without depending on a SignalR library:
 
-- **Connect**: convert the hub URL's `https`/`http` scheme to `wss`/`ws` and append
-  `access_token=<token>` to the query string, URL-encoded. Skip negotiation, as the
+- **Connect**: convert the hub URL's `https`/`http` scheme to `wss`/`ws` and set
+  `access_token=<token>` in the query string, URL-encoded. Replace any `access_token`
+  already in the configured URL: the official guide builds hub URLs as
+  `...?access_token=` + token, and a duplicate parameter would reach the server as one
+  comma-joined value. Skip negotiation, as the
   official guide does with `skipNegotiation: true`. Also send `Authorization: Bearer
   <token>` on the upgrade request.
 - **Handshake**: send `{"protocol":"json","version":1}` followed by the record separator
