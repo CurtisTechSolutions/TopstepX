@@ -67,7 +67,8 @@ async fn main() -> topstepx::Result<()> {
   claim is unreadable, the token is assumed to expire 24 hours after it was obtained.
 * **Renewal:** within `refresh_margin` of expiry (default 1 hour), the client calls
   `POST /api/Auth/validate` and stores `newToken`. If renewal fails, it logs in again when
-  credentials are configured, and otherwise keeps the still-valid token. An expired token
+  credentials are configured. Otherwise it keeps the still-valid token and waits 60 s
+  before trying `validate` again, so a failing renewal cannot double every request. An expired token
   is replaced by a fresh login, never renewed, as the current guide recommends. Concurrent
   callers share a single login or renewal.
 * **HTTP 401:** with credentials, the client logs in again and retries the request once.

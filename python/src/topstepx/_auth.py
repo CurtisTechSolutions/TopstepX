@@ -14,6 +14,8 @@ from dataclasses import dataclass, field
 
 TOKEN_FALLBACK_LIFETIME = 24 * 3600.0
 """Assumed lifetime of a token without a decodable JWT ``exp`` claim."""
+RENEWAL_COOLDOWN = 60.0
+"""After a failed renewal that keeps the current token, skip ``validate`` this long."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,17 +51,22 @@ class Session:
         expires_at: When the token expires (epoch seconds).
         generation: Increases every time a token is stored; used to detect that
             another caller replaced the token.
+        renewal_blocked_until: After a failed renewal that kept this token, no
+            ``validate`` is attempted before this time (epoch seconds). A newly
+            stored token starts without a cooldown.
     """
 
     token: str = field(repr=False)
     obtained_at: float
     expires_at: float
     generation: int
+    renewal_blocked_until: float | None = None
 
     def __repr__(self) -> str:
         return (
             f"Session(token=<redacted>, obtained_at={self.obtained_at!r}, "
-            f"expires_at={self.expires_at!r}, generation={self.generation!r})"
+            f"expires_at={self.expires_at!r}, generation={self.generation!r}, "
+            f"renewal_blocked_until={self.renewal_blocked_until!r})"
         )
 
 
@@ -115,7 +122,9 @@ def plan_token(
     1. No token: log in when credentials exist, otherwise fail.
     2. Expired (``now >= exp``): log in when credentials exist, otherwise use the
        token anyway and let the server decide (tolerates clock skew).
-    3. Inside the refresh margin (``now >= exp - margin``): validate.
+    3. Inside the refresh margin (``now >= exp - margin``): validate, unless a
+       failed renewal put the session in its cooldown (``now <
+       renewal_blocked_until``), in which case use the token as-is.
     4. Otherwise use the stored token.
     """
     if session is None:
@@ -123,5 +132,8 @@ def plan_token(
     if now >= session.expires_at:
         return TokenAction.LOGIN if has_credentials else TokenAction.USE
     if now >= session.expires_at - margin:
+        blocked_until = session.renewal_blocked_until
+        if blocked_until is not None and now < blocked_until:
+            return TokenAction.USE
         return TokenAction.VALIDATE
     return TokenAction.USE

@@ -69,6 +69,32 @@ func TestDecideToken(t *testing.T) {
 			t.Errorf("%s: action %d, want %d", c.name, got, c.want)
 		}
 	}
+
+	// The renewal cooldown suppresses validate inside the margin only.
+	s := &session{token: "t", expiry: now.Add(30 * time.Minute), renewBlockedUntil: now.Add(time.Second)}
+	if got := s.decideLocked(now, time.Hour); got != actUse {
+		t.Errorf("cooldown: action %d, want use", got)
+	}
+	if got := s.decideLocked(now.Add(time.Second), time.Hour); got != actValidate {
+		t.Errorf("cooldown over: action %d, want validate", got)
+	}
+	s = &session{creds: creds, token: "t", expiry: now.Add(-time.Second), renewBlockedUntil: now.Add(time.Minute)}
+	if got := s.decideLocked(now, time.Hour); got != actLogin {
+		t.Errorf("expired during cooldown: action %d, want login", got)
+	}
+	s.blockRenewal("other", now.Add(time.Hour)) // a different token is not blocked
+	if !s.renewBlockedUntil.Equal(now.Add(time.Minute)) {
+		t.Error("blockRenewal must only apply to the stored token")
+	}
+	s.store("new", now)
+	if !s.renewBlockedUntil.IsZero() {
+		t.Error("storing a token must clear the cooldown")
+	}
+	s.renewBlockedUntil = now.Add(time.Minute)
+	s.invalidate("new")
+	if !s.renewBlockedUntil.IsZero() {
+		t.Error("invalidate must clear the cooldown")
+	}
 }
 
 func TestParseRetryAfter(t *testing.T) {

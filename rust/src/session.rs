@@ -34,6 +34,9 @@ pub(crate) struct TokenState {
     /// Increases every time a token is stored, so concurrent 401 handlers can tell whether
     /// someone else already replaced the token that failed.
     pub(crate) generation: u64,
+    /// After a failed renewal that kept this token, no renewal is attempted before this
+    /// time. A newly stored token starts without a cooldown.
+    pub(crate) renewal_blocked_until: Option<DateTime<Utc>>,
 }
 
 impl fmt::Debug for TokenState {
@@ -62,6 +65,8 @@ impl TokenState {
         let margin = ChronoDuration::from_std(margin).unwrap_or(ChronoDuration::MAX);
         match self.expires_at.checked_sub_signed(margin) {
             Some(refresh_at) if now < refresh_at => Freshness::Fresh,
+            // Inside the margin but cooling down after a failed renewal: use as-is.
+            _ if self.renewal_blocked_until.is_some_and(|until| now < until) => Freshness::Fresh,
             _ => Freshness::NeedsRefresh,
         }
     }
@@ -92,6 +97,7 @@ impl Session {
             token: Arc::from(token),
             expires_at,
             generation: self.generation.fetch_add(1, Ordering::SeqCst) + 1,
+            renewal_blocked_until: None,
         };
         *self
             .state
@@ -105,6 +111,18 @@ impl Session {
             .state
             .write()
             .unwrap_or_else(|poisoned| poisoned.into_inner()) = None;
+    }
+
+    /// Blocks renewal of the token stored as `generation` until `until`. Does nothing when
+    /// that token was already replaced.
+    pub(crate) fn pause_renewal(&self, generation: u64, until: DateTime<Utc>) {
+        let mut state = self
+            .state
+            .write()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        if let Some(current) = state.as_mut().filter(|s| s.generation == generation) {
+            current.renewal_blocked_until = Some(until);
+        }
     }
 
     /// Clears the stored token only if it is still `token`; returns whether it did.
@@ -176,6 +194,43 @@ mod tests {
         let state = session.store("opaque".into());
         let lifetime = state.expires_at - Utc::now();
         assert!(lifetime > ChronoDuration::hours(23) && lifetime <= ChronoDuration::hours(24));
+    }
+
+    #[test]
+    fn renewal_cooldown_is_per_token() {
+        let session = Session::default();
+        let now = Utc::now();
+        let margin = Duration::from_secs(3600);
+        let soon = session.store(make_jwt((now + ChronoDuration::minutes(10)).timestamp()));
+        session.pause_renewal(soon.generation + 1, now + ChronoDuration::seconds(60));
+        assert_eq!(
+            session.current().unwrap().freshness(now, margin),
+            Freshness::NeedsRefresh,
+            "stale generation is ignored"
+        );
+
+        session.pause_renewal(soon.generation, now + ChronoDuration::seconds(60));
+        let paused = session.current().unwrap();
+        assert_eq!(paused.freshness(now, margin), Freshness::Fresh);
+        assert_eq!(
+            paused.freshness(now + ChronoDuration::seconds(59), margin),
+            Freshness::Fresh
+        );
+        assert_eq!(
+            paused.freshness(now + ChronoDuration::seconds(60), margin),
+            Freshness::NeedsRefresh
+        );
+        assert_eq!(
+            paused.freshness(now + ChronoDuration::minutes(11), margin),
+            Freshness::Expired
+        );
+
+        let replaced = session.store(make_jwt((now + ChronoDuration::minutes(10)).timestamp()));
+        assert_eq!(
+            replaced.renewal_blocked_until, None,
+            "a new token starts without a cooldown"
+        );
+        assert_eq!(replaced.freshness(now, margin), Freshness::NeedsRefresh);
     }
 
     #[test]

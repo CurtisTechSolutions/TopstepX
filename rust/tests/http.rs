@@ -731,3 +731,29 @@ async fn invalidate_token_only_discards_a_matching_token() {
     assert!(client.invalidate_token("current"));
     assert!(!client.has_token());
 }
+
+#[tokio::test]
+async fn failed_renewal_pauses_further_renewals() {
+    let server = MockServer::start().await;
+    let token = jwt(chrono::Duration::minutes(10));
+    Mock::given(path("/api/Auth/validate"))
+        .respond_with(ResponseTemplate::new(500))
+        .expect(1)
+        .mount(&server)
+        .await;
+    Mock::given(path("/api/Account/search"))
+        .and(header("authorization", format!("Bearer {token}").as_str()))
+        .respond_with(ok(json!({"accounts": []})))
+        .expect(3)
+        .mount(&server)
+        .await;
+
+    let client = Client::builder()
+        .base_url(server.uri())
+        .token(token)
+        .build()
+        .unwrap();
+    for _ in 0..3 {
+        client.accounts().search(true).await.unwrap();
+    }
+}
