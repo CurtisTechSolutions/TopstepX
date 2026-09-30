@@ -1,0 +1,3904 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://spec.openapis.org/oas/3.1/dialect/base",
+  "info": {
+    "title": "ProjectX Gateway API — derived reference",
+    "version": "2026-09-29.1",
+    "description": "OpenAPI conversion of the linked ProjectX Swagger 2.0 schema, enriched from the public guides on 2026-09-29. Contains 16 guide-documented operations and 5 Swagger-only operations. This is a derived artifact, not a vendor release. Source conflicts and modeling decisions are recorded in README.md. Examples are synthetic and were not sent to the API. SignalR is documented separately in realtime.md. Request examples use historical contract identifiers solely to show shape. Replace them with current values returned by contract discovery."
+  },
+  "servers": [
+    {
+      "url": "https://api.topstepx.com",
+      "description": "TopstepX connection published by the source documentation; other firms may use different URLs."
+    }
+  ],
+  "externalDocs": {
+    "description": "ProjectX source documentation",
+    "url": "https://gateway.docs.projectx.com/docs/intro/"
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "Account"
+    },
+    {
+      "name": "Contract"
+    },
+    {
+      "name": "History"
+    },
+    {
+      "name": "Order"
+    },
+    {
+      "name": "Position"
+    },
+    {
+      "name": "Trade"
+    },
+    {
+      "name": "Status"
+    }
+  ],
+  "paths": {
+    "/api/Account/search": {
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Find trading accounts",
+        "description": "Return accounts matching the active-account filter.",
+        "operationId": "Account_SearchAccounts",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/api-reference/account/search-accounts/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchAccountResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchAccountResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "accounts": [
+                        {
+                          "id": 123,
+                          "name": "EXAMPLE_ACCOUNT",
+                          "balance": 50000,
+                          "canTrade": true,
+                          "isVisible": true,
+                          "simulated": true
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchAccountResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchAccountRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "onlyActiveAccounts": true
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchAccountRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchAccountRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auth/loginApp": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Application login (unsupported by current guide)",
+        "description": "Present in the linked Swagger schema, but the current authentication guide says API-key login is the only supported token-creation method. Included for inventory completeness; availability is unverified. Use /api/Auth/loginKey.",
+        "operationId": "Auth_LoginApp",
+        "externalDocs": {
+          "url": "https://api.topstepx.com/swagger/v1/swagger.json"
+        },
+        "x-documentation-status": "swagger-only",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "token": "EXAMPLE_JWT_TOKEN"
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "security": [],
+        "x-support-status": "not-supported-by-current-authentication-guide",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginAppRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "userName": "YOUR_USERNAME",
+                    "password": "YOUR_PASSWORD",
+                    "deviceId": "YOUR_DEVICE_ID",
+                    "appId": "YOUR_APP_ID",
+                    "verifyKey": "YOUR_VERIFY_KEY"
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginAppRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginAppRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auth/loginKey": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Create a session using an API key",
+        "description": "Submit the platform username and API key. Business failures use HTTP 200; inspect success and errorCode. Missing credentials produce HTTP 400. Reuse the returned JWT for REST and SignalR. Tokens last 24 hours. Refresh before expiry or log in again after expiry. Existing tokens remain valid after another login.",
+        "operationId": "Auth_LoginKey",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/getting-started/authenticate/authenticate-api-key/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "token": "EXAMPLE_JWT_TOKEN"
+                    }
+                  },
+                  "invalidCredentials": {
+                    "summary": "Invalid API-key credentials return HTTP 200.",
+                    "value": {
+                      "success": false,
+                      "errorCode": 3,
+                      "errorMessage": null,
+                      "hasBusinessFailure": true,
+                      "token": null
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "userName or apiKey is missing. The guide does not specify the response-body shape."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginApiKeyRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "userName": "YOUR_PLATFORM_USERNAME",
+                    "apiKey": "YOUR_API_KEY"
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginApiKeyRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginApiKeyRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "End the authenticated session",
+        "description": "Listed in the linked Swagger schema; no dedicated guide page was found. The effect on other sessions is not specified.",
+        "operationId": "Auth_Logout",
+        "externalDocs": {
+          "url": "https://api.topstepx.com/swagger/v1/swagger.json"
+        },
+        "x-documentation-status": "swagger-only",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/api/Auth/validate": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Validate and renew a session",
+        "description": "Send the current JWT in the Authorization header. No request body is documented. Store newToken after success. The validation page suggests expired tokens can be renewed, while the newer login guide says refresh before expiry. Use the latter conservative flow; log in again after expiry.",
+        "operationId": "Auth_Validate",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/getting-started/validate-session/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "newToken": "EXAMPLE_RENEWED_JWT_TOKEN"
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/api/Contract/search": {
+      "post": {
+        "tags": [
+          "Contract"
+        ],
+        "summary": "Find contracts by name",
+        "description": "Name search returns at most 20 contracts. The live flag selects the data subscription.",
+        "operationId": "Contract_SearchContracts",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/api-reference/market-data/search-contracts/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchContractResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchContractResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "contracts": [
+                        {
+                          "id": "CON.F.US.EP.U25",
+                          "name": "ESU5",
+                          "description": "Historical example contract; retrieve a current identifier before use.",
+                          "tickSize": 0.25,
+                          "tickValue": 12.5,
+                          "activeContract": false,
+                          "symbolId": "F.US.EP"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchContractResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchContractRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "searchText": "ES",
+                    "live": false
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchContractRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchContractRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Contract/searchById": {
+      "post": {
+        "tags": [
+          "Contract"
+        ],
+        "summary": "Look up one contract",
+        "description": "Retrieve the contract metadata for a contract identifier.",
+        "operationId": "Contract_SearchContractById",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/api-reference/market-data/search-contracts-by-id/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchContractByIdResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchContractByIdResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "contract": {
+                        "id": "CON.F.US.EP.U25",
+                        "name": "ESU5",
+                        "description": "Historical example contract; retrieve a current identifier before use.",
+                        "tickSize": 0.25,
+                        "tickValue": 12.5,
+                        "activeContract": false,
+                        "symbolId": "F.US.EP"
+                      }
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchContractByIdResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchContractByIdRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "contractId": "CON.F.US.EP.U25"
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchContractByIdRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchContractByIdRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Contract/available": {
+      "post": {
+        "tags": [
+          "Contract"
+        ],
+        "summary": "List available contracts",
+        "description": "Retrieve contracts available for the selected live or simulated data subscription. Fetch current identifiers instead of reusing historical documentation examples.",
+        "operationId": "Contract_AvailableContracts",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/api-reference/market-data/available-contracts/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAvailableContractResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAvailableContractResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "contracts": [
+                        {
+                          "id": "CON.F.US.EP.U25",
+                          "name": "ESU5",
+                          "description": "Historical example contract; retrieve a current identifier before use.",
+                          "tickSize": 0.25,
+                          "tickValue": 12.5,
+                          "activeContract": false,
+                          "symbolId": "F.US.EP"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAvailableContractResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListAvailableContractRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "live": false
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListAvailableContractRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListAvailableContractRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/History/retrieveBars": {
+      "post": {
+        "tags": [
+          "History"
+        ],
+        "summary": "Retrieve historical price bars",
+        "description": "Return historical OHLCV bars. At most 20,000 bars may be requested. Rate limit: 50 requests per 30 seconds. The guide incorrectly labels contractId as integer; its example and the official schema use string.",
+        "operationId": "History_GetBars",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/api-reference/market-data/retrieve-bars/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrieveBarResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrieveBarResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "bars": [
+                        {
+                          "t": "2025-07-01T14:00:00Z",
+                          "o": 6000,
+                          "h": 6002,
+                          "l": 5999,
+                          "c": 6001,
+                          "v": 125
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrieveBarResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetrieveBarRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "contractId": "CON.F.US.EP.U25",
+                    "live": false,
+                    "startTime": "2025-07-01T00:00:00Z",
+                    "endTime": "2025-07-02T00:00:00Z",
+                    "unit": 2,
+                    "unitNumber": 5,
+                    "limit": 100,
+                    "includePartialBar": false
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetrieveBarRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetrieveBarRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Order/search": {
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Find orders within a time range",
+        "description": "Filter orders by account and creation-time range. For trailing stops, response trailPrice is a price distance; request trailPrice is an absolute price.",
+        "operationId": "Order_SearchOrders",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/api-reference/order/order-search/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOrderResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOrderResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "orders": [
+                        {
+                          "id": 456,
+                          "accountId": 123,
+                          "contractId": "CON.F.US.EP.U25",
+                          "symbolId": "F.US.EP",
+                          "creationTimestamp": "2025-07-01T14:00:00Z",
+                          "updateTimestamp": "2025-07-01T14:01:00Z",
+                          "status": 1,
+                          "type": 1,
+                          "side": 0,
+                          "size": 1,
+                          "limitPrice": 6000,
+                          "stopPrice": null,
+                          "fillVolume": 0,
+                          "filledPrice": null,
+                          "customTag": null
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOrderRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "accountId": 123,
+                    "startTimestamp": "2025-07-01T00:00:00Z",
+                    "endTimestamp": "2025-07-02T00:00:00Z"
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOrderRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOrderRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Order/searchById": {
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Look up one account order",
+        "description": "Listed in Swagger only. Select an order by accountId and orderId; the account must belong to the caller.",
+        "operationId": "Order_SearchOrderById",
+        "externalDocs": {
+          "url": "https://api.topstepx.com/swagger/v1/swagger.json"
+        },
+        "x-documentation-status": "swagger-only",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOrderByIdResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOrderByIdResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "order": {
+                        "id": 456,
+                        "accountId": 123,
+                        "contractId": "CON.F.US.EP.U25",
+                        "symbolId": "F.US.EP",
+                        "creationTimestamp": "2025-07-01T14:00:00Z",
+                        "updateTimestamp": "2025-07-01T14:01:00Z",
+                        "status": 1,
+                        "type": 1,
+                        "side": 0,
+                        "size": 1,
+                        "limitPrice": 6000,
+                        "stopPrice": null,
+                        "fillVolume": 0,
+                        "filledPrice": null,
+                        "customTag": null
+                      }
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOrderByIdResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOrderByIdRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "accountId": 123,
+                    "orderId": 456
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOrderByIdRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOrderByIdRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Order/searchOpen": {
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "List open account orders",
+        "description": "Retrieve open orders for the selected account. Response metadata follows the current linked schema, which contains more fields than the guide examples.",
+        "operationId": "Order_SearchOpenOrders",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/api-reference/order/order-search-open/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOrderResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOrderResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "orders": [
+                        {
+                          "id": 456,
+                          "accountId": 123,
+                          "contractId": "CON.F.US.EP.U25",
+                          "symbolId": "F.US.EP",
+                          "creationTimestamp": "2025-07-01T14:00:00Z",
+                          "updateTimestamp": "2025-07-01T14:01:00Z",
+                          "status": 1,
+                          "type": 1,
+                          "side": 0,
+                          "size": 1,
+                          "limitPrice": 6000,
+                          "stopPrice": null,
+                          "fillVolume": 0,
+                          "filledPrice": null,
+                          "customTag": null
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOpenOrderRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "accountId": 123
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOpenOrderRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOpenOrderRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Order/v2/query": {
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Filter and paginate account orders",
+        "description": "Listed in Swagger only. Use filter with optional pagination and sorting. Defaults and pagination bounds are not published in the inspected schema; none are invented here.",
+        "operationId": "Order_SearchOrdersQuery",
+        "externalDocs": {
+          "url": "https://api.topstepx.com/swagger/v1/swagger.json"
+        },
+        "x-documentation-status": "swagger-only",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOrdersQueryResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOrdersQueryResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "orders": [
+                        {
+                          "id": 456,
+                          "accountId": 123,
+                          "contractId": "CON.F.US.EP.U25",
+                          "symbolId": "F.US.EP",
+                          "creationTimestamp": "2025-07-01T14:00:00Z",
+                          "updateTimestamp": "2025-07-01T14:01:00Z",
+                          "status": 1,
+                          "type": 1,
+                          "side": 0,
+                          "size": 1,
+                          "limitPrice": 6000,
+                          "stopPrice": null,
+                          "fillVolume": 0,
+                          "filledPrice": null,
+                          "customTag": null
+                        }
+                      ],
+                      "totalCount": 1
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOrdersQueryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request rejected.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOrdersQueryRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "filter": {
+                      "accountId": 123,
+                      "statuses": [
+                        1
+                      ],
+                      "contractId": "CON.F.US.EP.U25",
+                      "createdAfter": "2025-07-01T00:00:00Z",
+                      "createdBefore": "2025-07-02T00:00:00Z"
+                    },
+                    "pageSize": 20,
+                    "pageOffset": 0,
+                    "sortBy": 0,
+                    "sortDirection": 1,
+                    "includeTotalCount": true
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOrdersQueryRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOrdersQueryRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Order/place": {
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Submit a trading order",
+        "description": "Submit an order and inspect success/errorCode even when an orderId is returned. Bracket objects require the account's Auto OCO Brackets mode; Position Brackets mode rejects them with code 2. For type 5, trailPrice is a required absolute price aligned to tickSize. The server converts its gap from the last price into whole ticks, discarding fractions; initial trails above 1,000 ticks are rejected. customTag must be unique within the account.",
+        "operationId": "Order_PlaceOrder",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/api-reference/order/order-place/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceOrderResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceOrderResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "orderId": 456
+                    }
+                  },
+                  "rejected": {
+                    "summary": "An identifier does not establish acceptance; inspect success and errorCode.",
+                    "value": {
+                      "success": false,
+                      "errorCode": 2,
+                      "errorMessage": "Trail Distance not set.",
+                      "hasBusinessFailure": true,
+                      "orderId": 457
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceOrderRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "accountId": 123,
+                    "contractId": "CON.F.US.EP.U25",
+                    "type": 2,
+                    "side": 0,
+                    "size": 1
+                  }
+                },
+                "trailingStop": {
+                  "summary": "Absolute stop-price example for a contract with tickSize 0.25.",
+                  "value": {
+                    "accountId": 123,
+                    "contractId": "CON.F.US.EP.U25",
+                    "type": 5,
+                    "side": 1,
+                    "size": 1,
+                    "trailPrice": 5998.5
+                  }
+                },
+                "brackets": {
+                  "summary": "Requires Auto OCO Brackets mode.",
+                  "value": {
+                    "accountId": 123,
+                    "contractId": "CON.F.US.EP.U25",
+                    "type": 2,
+                    "side": 0,
+                    "size": 1,
+                    "stopLossBracket": {
+                      "ticks": 8,
+                      "type": 4
+                    },
+                    "takeProfitBracket": {
+                      "ticks": 16,
+                      "type": 1
+                    }
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceOrderRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceOrderRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Order/cancel": {
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Cancel an account order",
+        "description": "Cancellation is documented for simulated accounts that are not copy-trading followers. Code 6 covers both unsupported live accounts and followers; inspect errorMessage.",
+        "operationId": "Order_CancelOrder",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/api-reference/order/order-cancel/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelOrderResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelOrderResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelOrderRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "accountId": 123,
+                    "orderId": 456
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelOrderRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelOrderRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Order/modify": {
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Update an open order",
+        "description": "Change an open order. For a trailing stop, trailPrice is a new absolute level, not a distance. The server recalculates the tick distance from its current last price. Unlike order placement, modification has no documented maximum trail-distance check. Misalignment or missing last price yields code 3.",
+        "operationId": "Order_ModifyOrder",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/api-reference/order/order-modify/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModifyOrderResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModifyOrderResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModifyOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModifyOrderRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "accountId": 123,
+                    "orderId": 456,
+                    "size": 2,
+                    "limitPrice": 6000,
+                    "stopPrice": null,
+                    "trailPrice": null
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModifyOrderRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModifyOrderRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Position/searchOpen": {
+      "post": {
+        "tags": [
+          "Position"
+        ],
+        "summary": "List open account positions",
+        "description": "Return the account's open positions.",
+        "operationId": "Position_SearchOpenPositions",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/api-reference/positions/search-open-positions/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchPositionResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchPositionResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "positions": [
+                        {
+                          "id": 789,
+                          "accountId": 123,
+                          "contractId": "CON.F.US.EP.U25",
+                          "creationTimestamp": "2025-07-01T14:00:00Z",
+                          "type": 1,
+                          "size": 2,
+                          "averagePrice": 6000
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchPositionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchPositionRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "accountId": 123
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchPositionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchPositionRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Position/closeContract": {
+      "post": {
+        "tags": [
+          "Position"
+        ],
+        "summary": "Close a contract position",
+        "description": "Close the position identified by accountId and contractId.",
+        "operationId": "Position_CloseContractPosition",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/api-reference/positions/close-positions/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosePositionResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosePositionResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosePositionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseContractPositionRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "accountId": 123,
+                    "contractId": "CON.F.US.EP.U25"
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseContractPositionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseContractPositionRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Position/partialCloseContract": {
+      "post": {
+        "tags": [
+          "Position"
+        ],
+        "summary": "Reduce a contract position",
+        "description": "Close a positive quantity no larger than the open position. Code 6 can mean the instrument is not tradable or has no current execution price; errorMessage may be null in either case. Code 9 includes unsupported live accounts.",
+        "operationId": "Position_PartialCloseContractPosition",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/api-reference/positions/close-positions-partial/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartialClosePositionResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartialClosePositionResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false
+                    }
+                  },
+                  "rejected": {
+                    "summary": "A business failure can have a null message.",
+                    "value": {
+                      "success": false,
+                      "errorCode": 6,
+                      "errorMessage": null,
+                      "hasBusinessFailure": true
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartialClosePositionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartialCloseContractPositionRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "accountId": 123,
+                    "contractId": "CON.F.US.EP.U25",
+                    "size": 1
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartialCloseContractPositionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartialCloseContractPositionRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Status/ping": {
+      "get": {
+        "tags": [
+          "Status"
+        ],
+        "summary": "Check API responsiveness",
+        "description": "Listed in Swagger only. Returns a string described as pong. Authentication is not declared in the upstream Swagger. This derived specification conservatively retains the documented default bearer requirement; anonymous access has not been verified.",
+        "operationId": "Status_Ping",
+        "externalDocs": {
+          "url": "https://api.topstepx.com/swagger/v1/swagger.json"
+        },
+        "x-documentation-status": "swagger-only",
+        "responses": {
+          "200": {
+            "description": "API responsiveness message.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": "pong"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/api/Trade/search": {
+      "post": {
+        "tags": [
+          "Trade"
+        ],
+        "summary": "Find account trades",
+        "description": "Retrieve account trades for the requested time interval. A null profitAndLoss marks a half-turn trade. The guide requires startTimestamp while Swagger makes it optional; this specification follows the guide for that request field.",
+        "operationId": "Trade_SearchHalfTurnTrades",
+        "externalDocs": {
+          "url": "https://gateway.docs.projectx.com/docs/api-reference/trade/trade-search/"
+        },
+        "x-documentation-status": "guide-and-swagger",
+        "responses": {
+          "200": {
+            "description": "Operation result. Inspect success and errorCode when present.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchHalfTradeResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchHalfTradeResponse"
+                },
+                "examples": {
+                  "illustrative": {
+                    "summary": "Synthetic result consistent with the assembled schema; not a captured server response.",
+                    "value": {
+                      "success": true,
+                      "errorCode": 0,
+                      "errorMessage": null,
+                      "hasBusinessFailure": false,
+                      "trades": [
+                        {
+                          "id": 987,
+                          "accountId": 123,
+                          "contractId": "CON.F.US.EP.U25",
+                          "creationTimestamp": "2025-07-01T14:00:00Z",
+                          "price": 6000,
+                          "profitAndLoss": null,
+                          "fees": 1.5,
+                          "side": 0,
+                          "size": 1,
+                          "voided": false,
+                          "orderId": 456
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchHalfTradeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchTradeRequest"
+              },
+              "examples": {
+                "illustrative": {
+                  "summary": "Synthetic example; replace account, contract, and credential values.",
+                  "value": {
+                    "accountId": 123,
+                    "startTimestamp": "2025-07-01T00:00:00Z",
+                    "endTimestamp": null
+                  }
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchTradeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchTradeRequest"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Use the token returned by loginKey. Send Authorization: Bearer <token>."
+      }
+    },
+    "schemas": {
+      "SearchAccountResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/SearchAccountErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradingAccountModel"
+            }
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchAccountResponse"
+      },
+      "SearchAccountErrorCode": {
+        "type": "integer",
+        "description": "0 = Success.",
+        "x-enumNames": [
+          "Success"
+        ],
+        "enum": [
+          0
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchAccountErrorCode"
+      },
+      "TradingAccountModel": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "balance",
+          "canTrade",
+          "isVisible",
+          "simulated"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "balance": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "canTrade": {
+            "type": "boolean"
+          },
+          "isVisible": {
+            "type": "boolean"
+          },
+          "simulated": {
+            "type": "boolean"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/TradingAccountModel"
+      },
+      "SearchAccountRequest": {
+        "type": "object",
+        "required": [
+          "onlyActiveAccounts"
+        ],
+        "properties": {
+          "onlyActiveAccounts": {
+            "type": "boolean"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchAccountRequest"
+      },
+      "LoginResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/LoginErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          },
+          "token": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/LoginResponse"
+      },
+      "LoginErrorCode": {
+        "type": "integer",
+        "description": "0 = Success; 1 = UserNotFound; 2 = PasswordVerificationFailed; 3 = InvalidCredentials; 4 = AppNotFound; 5 = AppVerificationFailed; 6 = InvalidDevice; 7 = AgreementsNotSigned; 8 = UnknownError; 9 = ApiSubscriptionNotFound; 10 = ApiKeyAuthenticationDisabled.",
+        "x-enumNames": [
+          "Success",
+          "UserNotFound",
+          "PasswordVerificationFailed",
+          "InvalidCredentials",
+          "AppNotFound",
+          "AppVerificationFailed",
+          "InvalidDevice",
+          "AgreementsNotSigned",
+          "UnknownError",
+          "ApiSubscriptionNotFound",
+          "ApiKeyAuthenticationDisabled"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/LoginErrorCode"
+      },
+      "LoginAppRequest": {
+        "type": "object",
+        "required": [
+          "userName",
+          "password",
+          "deviceId",
+          "appId",
+          "verifyKey"
+        ],
+        "properties": {
+          "userName": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "deviceId": {
+            "type": "string"
+          },
+          "appId": {
+            "type": "string"
+          },
+          "verifyKey": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/LoginAppRequest"
+      },
+      "LoginApiKeyRequest": {
+        "type": "object",
+        "required": [
+          "userName",
+          "apiKey"
+        ],
+        "properties": {
+          "userName": {
+            "type": "string",
+            "description": "Platform sign-in username, case-insensitive; not an email address or account label."
+          },
+          "apiKey": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "API key issued in the firm's trading platform."
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/LoginApiKeyRequest"
+      },
+      "LogoutResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/LogoutErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/LogoutResponse"
+      },
+      "LogoutErrorCode": {
+        "type": "integer",
+        "description": "0 = Success; 1 = InvalidSession; 2 = UnknownError.",
+        "x-enumNames": [
+          "Success",
+          "InvalidSession",
+          "UnknownError"
+        ],
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/LogoutErrorCode"
+      },
+      "ValidateResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/ValidateErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          },
+          "newToken": {
+            "type": "string"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/ValidateResponse"
+      },
+      "ValidateErrorCode": {
+        "type": "integer",
+        "description": "0 = Success; 1 = InvalidSession; 2 = SessionNotFound; 3 = ExpiredToken; 4 = UnknownError.",
+        "x-enumNames": [
+          "Success",
+          "InvalidSession",
+          "SessionNotFound",
+          "ExpiredToken",
+          "UnknownError"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/ValidateErrorCode"
+      },
+      "SearchContractResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/SearchContractErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          },
+          "contracts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractModel"
+            }
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchContractResponse"
+      },
+      "SearchContractErrorCode": {
+        "type": "integer",
+        "description": "0 = Success.",
+        "x-enumNames": [
+          "Success"
+        ],
+        "enum": [
+          0
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchContractErrorCode"
+      },
+      "ContractModel": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "tickSize",
+          "tickValue",
+          "activeContract",
+          "symbolId"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "tickSize": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "tickValue": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "activeContract": {
+            "type": "boolean"
+          },
+          "symbolId": {
+            "type": "string"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/ContractModel"
+      },
+      "SearchContractRequest": {
+        "type": "object",
+        "required": [
+          "searchText",
+          "live"
+        ],
+        "properties": {
+          "searchText": {
+            "type": "string"
+          },
+          "live": {
+            "type": "boolean"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchContractRequest"
+      },
+      "SearchContractByIdResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/SearchContractByIdErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          },
+          "contract": {
+            "$ref": "#/components/schemas/ContractModel"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchContractByIdResponse"
+      },
+      "SearchContractByIdErrorCode": {
+        "type": "integer",
+        "description": "0 = Success; 1 = ContractNotFound.",
+        "x-enumNames": [
+          "Success",
+          "ContractNotFound"
+        ],
+        "enum": [
+          0,
+          1
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchContractByIdErrorCode"
+      },
+      "SearchContractByIdRequest": {
+        "type": "object",
+        "required": [
+          "contractId"
+        ],
+        "properties": {
+          "contractId": {
+            "type": "string"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchContractByIdRequest"
+      },
+      "ListAvailableContractResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/ListAvailableContractErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          },
+          "contracts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractModel"
+            }
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/ListAvailableContractResponse"
+      },
+      "ListAvailableContractErrorCode": {
+        "type": "integer",
+        "description": "0 = Success.",
+        "x-enumNames": [
+          "Success"
+        ],
+        "enum": [
+          0
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/ListAvailableContractErrorCode"
+      },
+      "ListAvailableContractRequest": {
+        "type": "object",
+        "required": [
+          "live"
+        ],
+        "properties": {
+          "live": {
+            "type": "boolean"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/ListAvailableContractRequest"
+      },
+      "RetrieveBarResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/RetrieveBarErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          },
+          "bars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AggregateBarModel"
+            }
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/RetrieveBarResponse"
+      },
+      "RetrieveBarErrorCode": {
+        "type": "integer",
+        "description": "0 = Success; 1 = ContractNotFound; 2 = UnitInvalid; 3 = UnitNumberInvalid; 4 = LimitInvalid.",
+        "x-enumNames": [
+          "Success",
+          "ContractNotFound",
+          "UnitInvalid",
+          "UnitNumberInvalid",
+          "LimitInvalid"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/RetrieveBarErrorCode"
+      },
+      "AggregateBarModel": {
+        "type": "object",
+        "required": [
+          "t",
+          "o",
+          "h",
+          "l",
+          "c",
+          "v"
+        ],
+        "properties": {
+          "t": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Bar timestamp."
+          },
+          "o": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Opening price."
+          },
+          "h": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Highest price."
+          },
+          "l": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Lowest price."
+          },
+          "c": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Closing price."
+          },
+          "v": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Traded volume."
+          },
+          "d": {
+            "type": "string",
+            "format": "date",
+            "description": "Date field present in Swagger; semantics not described in the guide."
+          },
+          "k": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Integer field present in Swagger; semantics not described in the guide."
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/AggregateBarModel"
+      },
+      "RetrieveBarRequest": {
+        "type": "object",
+        "required": [
+          "contractId",
+          "live",
+          "startTime",
+          "endTime",
+          "unit",
+          "unitNumber",
+          "limit",
+          "includePartialBar"
+        ],
+        "properties": {
+          "contractId": {
+            "type": "string",
+            "description": "String contract identifier; follows Swagger and request examples rather than the guide's integer typo."
+          },
+          "live": {
+            "type": "boolean"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/AggregateBarUnit",
+            "description": "The guide describes 1–6. Values 0 (Unspecified) and 7 (Tick) appear only in Swagger; acceptance is not verified.",
+            "x-guide-enum": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "unitNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 20000
+          },
+          "includePartialBar": {
+            "type": "boolean"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/RetrieveBarRequest"
+      },
+      "AggregateBarUnit": {
+        "type": "integer",
+        "description": "0 = Unspecified; 1 = Second; 2 = Minute; 3 = Hour; 4 = Day; 5 = Week; 6 = Month; 7 = Tick.",
+        "x-enumNames": [
+          "Unspecified",
+          "Second",
+          "Minute",
+          "Hour",
+          "Day",
+          "Week",
+          "Month",
+          "Tick"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/AggregateBarUnit"
+      },
+      "SearchOrderResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/SearchOrderErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderModel"
+            }
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchOrderResponse"
+      },
+      "SearchOrderErrorCode": {
+        "type": "integer",
+        "description": "0 = Success; 1 = AccountNotFound.",
+        "x-enumNames": [
+          "Success",
+          "AccountNotFound"
+        ],
+        "enum": [
+          0,
+          1
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchOrderErrorCode"
+      },
+      "OrderModel": {
+        "type": "object",
+        "required": [
+          "id",
+          "accountId",
+          "contractId",
+          "symbolId",
+          "creationTimestamp",
+          "updateTimestamp",
+          "status",
+          "type",
+          "side",
+          "size",
+          "fillVolume"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contractId": {
+            "type": "string"
+          },
+          "symbolId": {
+            "type": "string"
+          },
+          "creationTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/OrderType"
+          },
+          "side": {
+            "$ref": "#/components/schemas/OrderSide"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limitPrice": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "decimal"
+          },
+          "stopPrice": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "decimal"
+          },
+          "fillVolume": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "filledPrice": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "decimal"
+          },
+          "customTag": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "trailDistance": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trailPrice": {
+            "type": "number",
+            "format": "decimal",
+            "description": "For a returned trailing stop, this is the price distance (ticks multiplied by tickSize), not the submitted absolute level."
+          },
+          "parentOrderId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "linkedOrderId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/OrderModel"
+      },
+      "OrderStatus": {
+        "type": "integer",
+        "description": "0 = None; 1 = Open; 2 = Filled; 3 = Cancelled; 4 = Expired; 5 = Rejected; 6 = Pending; 7 = PendingCancellation; 8 = Suspended.",
+        "x-enumNames": [
+          "None",
+          "Open",
+          "Filled",
+          "Cancelled",
+          "Expired",
+          "Rejected",
+          "Pending",
+          "PendingCancellation",
+          "Suspended"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/OrderStatus"
+      },
+      "OrderType": {
+        "type": "integer",
+        "description": "0 = Unknown; 1 = Limit; 2 = Market; 3 = StopLimit; 4 = Stop; 5 = TrailingStop; 6 = JoinBid; 7 = JoinAsk.",
+        "x-enumNames": [
+          "Unknown",
+          "Limit",
+          "Market",
+          "StopLimit",
+          "Stop",
+          "TrailingStop",
+          "JoinBid",
+          "JoinAsk"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/OrderType"
+      },
+      "OrderSide": {
+        "type": "integer",
+        "description": "0 = Bid; 1 = Ask.",
+        "x-enumNames": [
+          "Bid",
+          "Ask"
+        ],
+        "enum": [
+          0,
+          1
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/OrderSide"
+      },
+      "SearchOrderRequest": {
+        "type": "object",
+        "required": [
+          "accountId",
+          "startTimestamp"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTimestamp": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchOrderRequest"
+      },
+      "SearchOrderByIdResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/SearchOrderByIdErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          },
+          "order": {
+            "$ref": "#/components/schemas/OrderModel"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchOrderByIdResponse"
+      },
+      "SearchOrderByIdErrorCode": {
+        "type": "integer",
+        "description": "0 = Success; 1 = OrderNotFound.",
+        "x-enumNames": [
+          "Success",
+          "OrderNotFound"
+        ],
+        "enum": [
+          0,
+          1
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchOrderByIdErrorCode"
+      },
+      "SearchOrderByIdRequest": {
+        "type": "object",
+        "required": [
+          "accountId",
+          "orderId"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orderId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchOrderByIdRequest"
+      },
+      "SearchOpenOrderRequest": {
+        "type": "object",
+        "required": [
+          "accountId"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchOpenOrderRequest"
+      },
+      "SearchOrdersQueryResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/SearchOrderErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderModel"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchOrdersQueryResponse"
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "additionalProperties": {},
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/ProblemDetails"
+      },
+      "SearchOrdersQueryRequest": {
+        "type": "object",
+        "required": [
+          "filter"
+        ],
+        "properties": {
+          "filter": {
+            "$ref": "#/components/schemas/GatewayOrderFilter"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageOffset": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sortBy": {
+            "$ref": "#/components/schemas/OrderSortField"
+          },
+          "sortDirection": {
+            "$ref": "#/components/schemas/SortDirection"
+          },
+          "includeTotalCount": {
+            "type": "boolean"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchOrdersQueryRequest"
+      },
+      "GatewayOrderFilter": {
+        "type": "object",
+        "required": [
+          "accountId"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderStatus"
+            }
+          },
+          "contractId": {
+            "type": "string"
+          },
+          "createdAfter": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBefore": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/GatewayOrderFilter"
+      },
+      "OrderSortField": {
+        "type": "integer",
+        "description": "0 = CreatedAt; 1 = Id.",
+        "x-enumNames": [
+          "CreatedAt",
+          "Id"
+        ],
+        "enum": [
+          0,
+          1
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/OrderSortField"
+      },
+      "SortDirection": {
+        "type": "integer",
+        "description": "0 = Asc; 1 = Desc.",
+        "x-enumNames": [
+          "Asc",
+          "Desc"
+        ],
+        "enum": [
+          0,
+          1
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SortDirection"
+      },
+      "PlaceOrderResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/PlaceOrderErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          },
+          "orderId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/PlaceOrderResponse"
+      },
+      "PlaceOrderErrorCode": {
+        "type": "integer",
+        "description": "0 = Success; 1 = AccountNotFound; 2 = OrderRejected; 3 = InsufficientFunds; 4 = AccountViolation; 5 = OutsideTradingHours; 6 = OrderPending; 7 = UnknownError; 8 = ContractNotFound; 9 = ContractNotActive; 10 = AccountRejected.",
+        "x-enumNames": [
+          "Success",
+          "AccountNotFound",
+          "OrderRejected",
+          "InsufficientFunds",
+          "AccountViolation",
+          "OutsideTradingHours",
+          "OrderPending",
+          "UnknownError",
+          "ContractNotFound",
+          "ContractNotActive",
+          "AccountRejected"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/PlaceOrderErrorCode"
+      },
+      "PlaceOrderRequest": {
+        "type": "object",
+        "required": [
+          "accountId",
+          "contractId",
+          "type",
+          "side",
+          "size"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contractId": {
+            "type": "string"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OrderType"
+              },
+              {
+                "enum": [
+                  1,
+                  2,
+                  4,
+                  5,
+                  6,
+                  7
+                ]
+              }
+            ],
+            "description": "Placement supports the six types listed in the guide. StopLimit (3) and Unknown (0) remain in the response enum only."
+          },
+          "side": {
+            "$ref": "#/components/schemas/OrderSide"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limitPrice": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "decimal"
+          },
+          "stopPrice": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "decimal"
+          },
+          "trailPrice": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "decimal",
+            "description": "For type 5, supply an absolute stop price aligned to tickSize. Do not send a distance."
+          },
+          "customTag": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "If supplied, this tag must be unique across the account."
+          },
+          "stopLossBracket": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlaceOrderBracket"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "takeProfitBracket": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlaceOrderBracket"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": 5
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            "then": {
+              "required": [
+                "trailPrice"
+              ],
+              "properties": {
+                "trailPrice": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/PlaceOrderRequest"
+      },
+      "PlaceOrderBracket": {
+        "type": "object",
+        "required": [
+          "ticks",
+          "type"
+        ],
+        "properties": {
+          "ticks": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OrderType"
+              },
+              {
+                "enum": [
+                  1,
+                  2,
+                  4,
+                  5,
+                  6,
+                  7
+                ]
+              }
+            ],
+            "description": "Placement supports the six types listed in the guide. StopLimit (3) and Unknown (0) remain in the response enum only."
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/PlaceOrderBracket"
+      },
+      "CancelOrderResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/CancelOrderErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/CancelOrderResponse"
+      },
+      "CancelOrderErrorCode": {
+        "type": "integer",
+        "description": "0 = Success; 1 = AccountNotFound; 2 = OrderNotFound; 3 = Rejected; 4 = Pending; 5 = UnknownError; 6 = AccountRejected.",
+        "x-enumNames": [
+          "Success",
+          "AccountNotFound",
+          "OrderNotFound",
+          "Rejected",
+          "Pending",
+          "UnknownError",
+          "AccountRejected"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/CancelOrderErrorCode"
+      },
+      "CancelOrderRequest": {
+        "type": "object",
+        "required": [
+          "accountId",
+          "orderId"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orderId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/CancelOrderRequest"
+      },
+      "ModifyOrderResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/ModifyOrderErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/ModifyOrderResponse"
+      },
+      "ModifyOrderErrorCode": {
+        "type": "integer",
+        "description": "0 = Success; 1 = AccountNotFound; 2 = OrderNotFound; 3 = Rejected; 4 = Pending; 5 = UnknownError; 6 = AccountRejected; 7 = ContractNotFound.",
+        "x-enumNames": [
+          "Success",
+          "AccountNotFound",
+          "OrderNotFound",
+          "Rejected",
+          "Pending",
+          "UnknownError",
+          "AccountRejected",
+          "ContractNotFound"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/ModifyOrderErrorCode"
+      },
+      "ModifyOrderRequest": {
+        "type": "object",
+        "required": [
+          "accountId",
+          "orderId"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orderId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "limitPrice": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "decimal"
+          },
+          "stopPrice": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "decimal"
+          },
+          "trailPrice": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "decimal",
+            "description": "Absolute replacement trailing-stop level; no maximum trail-distance check is documented for modification."
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/ModifyOrderRequest"
+      },
+      "SearchPositionResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/SearchPositionErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          },
+          "positions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PositionModel"
+            }
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchPositionResponse"
+      },
+      "SearchPositionErrorCode": {
+        "type": "integer",
+        "description": "0 = Success; 1 = AccountNotFound.",
+        "x-enumNames": [
+          "Success",
+          "AccountNotFound"
+        ],
+        "enum": [
+          0,
+          1
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchPositionErrorCode"
+      },
+      "PositionModel": {
+        "type": "object",
+        "required": [
+          "id",
+          "accountId",
+          "contractId",
+          "creationTimestamp",
+          "type",
+          "size",
+          "averagePrice"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contractId": {
+            "type": "string"
+          },
+          "contractDisplayName": {
+            "type": "string"
+          },
+          "creationTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "type": {
+            "$ref": "#/components/schemas/PositionType"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "averagePrice": {
+            "type": "number",
+            "format": "decimal"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/PositionModel"
+      },
+      "PositionType": {
+        "type": "integer",
+        "description": "0 = Undefined; 1 = Long; 2 = Short.",
+        "x-enumNames": [
+          "Undefined",
+          "Long",
+          "Short"
+        ],
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/PositionType"
+      },
+      "SearchPositionRequest": {
+        "type": "object",
+        "required": [
+          "accountId"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchPositionRequest"
+      },
+      "ClosePositionResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/ClosePositionErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/ClosePositionResponse"
+      },
+      "ClosePositionErrorCode": {
+        "type": "integer",
+        "description": "0 = Success; 1 = AccountNotFound; 2 = PositionNotFound; 3 = ContractNotFound; 4 = ContractNotActive; 5 = OrderRejected; 6 = OrderPending; 7 = UnknownError; 8 = AccountRejected.",
+        "x-enumNames": [
+          "Success",
+          "AccountNotFound",
+          "PositionNotFound",
+          "ContractNotFound",
+          "ContractNotActive",
+          "OrderRejected",
+          "OrderPending",
+          "UnknownError",
+          "AccountRejected"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/ClosePositionErrorCode"
+      },
+      "CloseContractPositionRequest": {
+        "type": "object",
+        "required": [
+          "accountId",
+          "contractId"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contractId": {
+            "type": "string"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/CloseContractPositionRequest"
+      },
+      "PartialClosePositionResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/PartialClosePositionErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/PartialClosePositionResponse"
+      },
+      "PartialClosePositionErrorCode": {
+        "type": "integer",
+        "description": "0 = Success; 1 = AccountNotFound; 2 = PositionNotFound; 3 = ContractNotFound; 4 = ContractNotActive; 5 = InvalidCloseSize; 6 = OrderRejected; 7 = OrderPending; 8 = UnknownError; 9 = AccountRejected.",
+        "x-enumNames": [
+          "Success",
+          "AccountNotFound",
+          "PositionNotFound",
+          "ContractNotFound",
+          "ContractNotActive",
+          "InvalidCloseSize",
+          "OrderRejected",
+          "OrderPending",
+          "UnknownError",
+          "AccountRejected"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/PartialClosePositionErrorCode"
+      },
+      "PartialCloseContractPositionRequest": {
+        "type": "object",
+        "required": [
+          "accountId",
+          "contractId",
+          "size"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contractId": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "description": "Quantity to close; cannot exceed the current position size."
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/PartialCloseContractPositionRequest"
+      },
+      "SearchHalfTradeResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "errorCode",
+          "hasBusinessFailure"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/SearchTradeErrorCode"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasBusinessFailure": {
+            "type": "boolean"
+          },
+          "trades": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HalfTradeModel"
+            }
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchHalfTradeResponse"
+      },
+      "SearchTradeErrorCode": {
+        "type": "integer",
+        "description": "0 = Success; 1 = AccountNotFound.",
+        "x-enumNames": [
+          "Success",
+          "AccountNotFound"
+        ],
+        "enum": [
+          0,
+          1
+        ],
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchTradeErrorCode"
+      },
+      "HalfTradeModel": {
+        "type": "object",
+        "required": [
+          "id",
+          "accountId",
+          "contractId",
+          "creationTimestamp",
+          "price",
+          "profitAndLoss",
+          "fees",
+          "side",
+          "size",
+          "voided",
+          "orderId"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contractId": {
+            "type": "string"
+          },
+          "creationTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "price": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "profitAndLoss": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "decimal",
+            "description": "Nullable even though required as a field. A null value represents a half-turn trade."
+          },
+          "fees": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "commissions": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "side": {
+            "$ref": "#/components/schemas/OrderSide"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "voided": {
+            "type": "boolean"
+          },
+          "orderId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/HalfTradeModel"
+      },
+      "SearchTradeRequest": {
+        "type": "object",
+        "required": [
+          "accountId",
+          "startTimestamp"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTimestamp": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "x-upstream-required": [
+          "accountId"
+        ],
+        "description": "startTimestamp is required here to follow the guide; upstream Swagger requires only accountId.",
+        "x-schema-source": "https://api.topstepx.com/swagger/v1/swagger.json#/definitions/SearchTradeRequest"
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "HTTP 401: authentication failed or the session expired. The inspected guides do not define a response-body schema."
+      },
+      "RateLimited": {
+        "description": "HTTP 429: reduce request frequency and wait before retrying. History/retrieveBars allows 50 requests per 30 seconds; other endpoints allow 200 per 60 seconds. Response-body and retry-header contracts are not documented."
+      }
+    }
+  },
+  "x-source": {
+    "swagger": "https://api.topstepx.com/swagger/v1/swagger.json",
+    "documentation": "https://gateway.docs.projectx.com/docs/intro/",
+    "retrieved": "2026-09-29",
+    "upstreamVersion": "1.0.0"
+  },
+  "x-rate-limits": {
+    "source": "https://gateway.docs.projectx.com/docs/getting-started/rate-limits/",
+    "history": {
+      "requests": 50,
+      "windowSeconds": 30
+    },
+    "otherEndpoints": {
+      "requests": 200,
+      "windowSeconds": 60
+    }
+  },
+  "x-signalr": {
+    "documentation": "https://gateway.docs.projectx.com/docs/realtime/",
+    "userHub": "https://rtc.topstepx.com/hubs/user",
+    "marketHub": "https://rtc.topstepx.com/hubs/market",
+    "companion": "realtime.md"
+  }
+}
