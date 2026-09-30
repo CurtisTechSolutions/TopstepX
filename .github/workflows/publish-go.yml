@@ -1,0 +1,49 @@
+name: Publish Go SDK
+
+# A Go module version is published by its tag: go/vX.Y.Z is version vX.Y.Z of
+# github.com/CurtisTechSolutions/TopstepX/go. When release-please creates the
+# tag, this workflow requests that version from the Go module proxy, so that
+# proxy.golang.org caches it and pkg.go.dev lists it before anyone fetches it.
+
+on:
+  push:
+    tags: ["go/v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proxy:
+    if: startsWith(github.ref, 'refs/tags/go/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check that the tag matches version.go
+        run: |
+          version="${GITHUB_REF_NAME#go/v}"
+          if ! grep -q "const Version = \"${version}\"" go/version.go; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match the Version constant in go/version.go."
+            exit 1
+          fi
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go/go.mod
+          cache: false
+
+      - name: Request the version from proxy.golang.org
+        env:
+          GOPROXY: https://proxy.golang.org
+        run: |
+          module="github.com/${GITHUB_REPOSITORY}/go"
+          version="${GITHUB_REF_NAME#go/}"
+          for attempt in 1 2 3 4 5; do
+            if go list -m -json "${module}@${version}"; then
+              exit 0
+            fi
+            sleep $((attempt * 15))
+          done
+          echo "::error::proxy.golang.org did not return ${module}@${version}."
+          exit 1
