@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -23,7 +25,20 @@ import (
 // Spec conformance tests (contract section 12.1) against
 // spec/projectx-openapi.json.
 
-const specPath = "../spec/projectx-openapi.json"
+const (
+	specDir  = "../spec"
+	specPath = specDir + "/projectx-openapi.json"
+)
+
+// requireSpec skips a test when the spec directory is missing, as it is when
+// the module is tested from the module cache rather than from a checkout of
+// the repository. A checkout with the directory but not the file still fails.
+func requireSpec(t *testing.T) {
+	t.Helper()
+	if _, err := os.Stat(specDir); errors.Is(err, fs.ErrNotExist) {
+		t.Skipf("%s not found: the spec tests need a checkout of the repository", specDir)
+	}
+}
 
 type specDoc struct {
 	paths   map[string]any
@@ -32,6 +47,7 @@ type specDoc struct {
 
 func loadSpec(t *testing.T) *specDoc {
 	t.Helper()
+	requireSpec(t)
 	raw, err := os.ReadFile(specPath)
 	if err != nil {
 		t.Fatalf("read spec: %v", err)
@@ -716,7 +732,8 @@ type validationReport struct {
 
 func readValidationReport(t *testing.T) validationReport {
 	t.Helper()
-	raw, err := os.ReadFile("../spec/validation-report.json")
+	requireSpec(t)
+	raw, err := os.ReadFile(specDir + "/validation-report.json")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -5,8 +5,8 @@ as deployed by TopstepX: all 21 REST operations, the SignalR user and market hub
 token lifecycle management, retries, client-side rate limiting and request validation.
 
 This SDK implements the cross-SDK behavior contract in
-[`../spec/SDK_BEHAVIOR.md`](../spec/SDK_BEHAVIOR.md); the Rust (`../rust`) and
-Python (`../python`) SDKs implement the same behavior. Where this SDK deviates or
+[`spec/SDK_BEHAVIOR.md`](https://github.com/CurtisTechSolutions/TopstepX/blob/main/spec/SDK_BEHAVIOR.md); the [Rust](https://github.com/CurtisTechSolutions/TopstepX/tree/main/rust) and
+[Python](https://github.com/CurtisTechSolutions/TopstepX/tree/main/python) SDKs implement the same behavior. Where this SDK deviates or
 decides something the contract leaves open, [Deviations and Go-specific
 decisions](#deviations-and-go-specific-decisions) says so.
 

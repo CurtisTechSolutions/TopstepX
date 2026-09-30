@@ -9,6 +9,9 @@ repository = "https://github.com/CurtisTechSolutions/TopstepX"
 readme = "README.md"
 keywords = ["topstepx", "projectx", "trading", "futures", "signalr"]
 categories = ["api-bindings", "finance", "asynchronous"]
+# The spec conformance test reads ../spec, which is outside the package; it runs
+# from a checkout of the repository only.
+exclude = ["tests/spec_conformance.rs"]
 
 [features]
 default = ["rustls", "realtime"]

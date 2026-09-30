@@ -39,6 +39,7 @@ from topstepx import (
     TransportError,
     UnauthorizedError,
     ValidationError,
+    __version__,
     operations,
 )
 from topstepx.models import PlaceOrderResponse, ValidateResponse
@@ -86,7 +87,7 @@ def test_lazy_login_and_bearer_header(make: Any, api: MockAPI, creds: dict[str, 
         assert request.headers["Authorization"] == f"Bearer {token}"
         assert request.headers["Content-Type"] == "application/json"
         assert request.headers["Accept"] == "application/json"
-        assert request.headers["User-Agent"] == "topstepx-python/0.1.0"
+        assert request.headers["User-Agent"] == f"topstepx-python/{__version__}"
     assert body(api.calls("/api/Account/search")[1]) == {"onlyActiveAccounts": False}
     assert h.client.token == token
 

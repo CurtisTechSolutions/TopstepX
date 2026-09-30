@@ -15,7 +15,7 @@ import pytest
 
 from conftest import MockAPI, envelope, make_jwt
 from fake_signalr import RS, FakeSignalR, wait_until
-from topstepx import AsyncClient, Client
+from topstepx import AsyncClient, Client, __version__
 from topstepx.errors import (
     ConnectionLostError,
     HandshakeError,
@@ -116,7 +116,7 @@ async def test_handshake_and_connection_details(server: FakeSignalR) -> None:
         assert conn.path == "/hubs/user"
         assert conn.token == "token-1"
         assert conn.headers["Authorization"] == "Bearer token-1"
-        assert conn.headers["User-Agent"] == "topstepx-python/0.1.0"
+        assert conn.headers["User-Agent"] == f"topstepx-python/{__version__}"
         assert conn.handshake == {"protocol": "json", "version": 1}
         stream = hub.events()
         first = await asyncio.wait_for(anext(stream), 1)
