@@ -4,10 +4,10 @@ A typed Python client for the [ProjectX Gateway API](https://gateway.docs.projec
 as deployed by TopstepX: all 21 REST operations (sync **and** asyncio clients) and the
 SignalR user and market hubs.
 
-It is one of three SDKs in this repository (Rust, Python, Go) that implement the same
-behavior, defined in [`../spec/SDK_BEHAVIOR.md`](../spec/SDK_BEHAVIOR.md). The REST contract
-is [`../spec/projectx-openapi.json`](../spec/projectx-openapi.json); the modeling decisions
-and known source conflicts are in [`../spec/README.md`](../spec/README.md).
+It is one of three SDKs in the [TopstepX repository](https://github.com/CurtisTechSolutions/TopstepX) (Rust, Python, Go) that implement the same
+behavior, defined in [`spec/SDK_BEHAVIOR.md`](https://github.com/CurtisTechSolutions/TopstepX/blob/main/spec/SDK_BEHAVIOR.md). The REST contract
+is [`spec/projectx-openapi.json`](https://github.com/CurtisTechSolutions/TopstepX/blob/main/spec/projectx-openapi.json); the modeling decisions
+and known source conflicts are in [`spec/README.md`](https://github.com/CurtisTechSolutions/TopstepX/blob/main/spec/README.md).
 
 > **Safety: orders are real.** Placing, modifying, cancelling and closing trade real
 > accounts. Develop and test against **simulated accounts** (`TradingAccount.simulated`).
@@ -463,6 +463,6 @@ python3 -m venv .venv
 The tests never contact the real API and need no credentials. HTTP behavior is tested with
 `httpx.MockTransport` against both clients; realtime behavior against a local
 `websockets` server speaking the SignalR JSON protocol (`tests/fake_signalr.py`); spec
-conformance reads [`../spec/projectx-openapi.json`](../spec/projectx-openapi.json) (all 21
+conformance reads [`spec/projectx-openapi.json`](https://github.com/CurtisTechSolutions/TopstepX/blob/main/spec/projectx-openapi.json) (all 21
 operations, every request and response example, a synthesized full-object round trip for
 every object schema, and every enum's values and names).

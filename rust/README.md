@@ -3,11 +3,12 @@
 Async Rust client for the [ProjectX Gateway API](https://gateway.docs.projectx.com/docs/intro/)
 as deployed by TopstepX:
 
-* all **21 REST operations** of the derived OpenAPI reference in [`../spec`](../spec);
+* all **21 REST operations** of the derived OpenAPI reference in [`spec/`](https://github.com/CurtisTechSolutions/TopstepX/tree/main/spec);
 * the **SignalR user and market hubs**, with automatic reconnection and subscription replay.
 
-The Python (`../python`) and Go (`../go`) SDKs in this repository implement the same behavior.
-That behavior is specified in [`../spec/SDK_BEHAVIOR.md`](../spec/SDK_BEHAVIOR.md).
+The [Python](https://github.com/CurtisTechSolutions/TopstepX/tree/main/python) and [Go](https://github.com/CurtisTechSolutions/TopstepX/tree/main/go) SDKs in the same repository implement the same
+behavior.
+That behavior is specified in [`spec/SDK_BEHAVIOR.md`](https://github.com/CurtisTechSolutions/TopstepX/blob/main/spec/SDK_BEHAVIOR.md).
 
 > **Safety:** order placement, modification, cancellation and position closing act on real
 > accounts. Develop against a simulated account. No test or read-only example in this crate
@@ -286,4 +287,4 @@ TOPSTEPX_ALLOW_TRADING=1 cargo run --example place_order -- <ACCOUNT_ID> ES   # 
 
 ## License
 
-GPL-3.0-only, see [`../LICENSE`](../LICENSE).
+GPL-3.0-only, see [`LICENSE`](https://github.com/CurtisTechSolutions/TopstepX/blob/main/LICENSE).
