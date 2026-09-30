@@ -1,0 +1,73 @@
+name: Publish Python SDK
+
+# Publishes the topstepx distribution to PyPI when release-please tags a Python
+# release (python/vX.Y.Z). It uses PyPI trusted publishing, so no token is
+# stored: PyPI must list this workflow (publish-python.yml) with the "pypi"
+# environment as a trusted publisher of the topstepx project. To retry a failed
+# publish, run this workflow from the tag (Run workflow, then pick the tag
+# under "Use workflow from").
+
+on:
+  push:
+    tags: ["python/v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  build:
+    if: startsWith(github.ref, 'refs/tags/python/v')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Test
+        run: |
+          python -m pip install -e '.[dev]' twine
+          python -m pytest -q
+
+      - name: Build
+        run: |
+          python -m build
+          python -m twine check --strict dist/*
+
+      - name: Check that the tag matches the built version
+        run: |
+          version="${GITHUB_REF_NAME#python/v}"
+          if [ ! -f "dist/topstepx-${version}-py3-none-any.whl" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match the built distributions: $(ls dist | tr '\n' ' ')"
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-dist
+          path: python/dist/
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/topstepx/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: python-dist
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
