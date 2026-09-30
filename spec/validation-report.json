@@ -1,0 +1,32 @@
+{
+  "checkedAt": "2026-09-29",
+  "openapi": "3.1.0",
+  "operations": 21,
+  "schemas": 69,
+  "references": 200,
+  "examples": 44,
+  "negativeCases": [
+    {
+      "name": "trailing-stop requires trailPrice",
+      "passed": true
+    },
+    {
+      "name": "trailing-stop rejects null trailPrice",
+      "passed": true
+    },
+    {
+      "name": "placement rejects unsupported StopLimit",
+      "passed": true
+    },
+    {
+      "name": "bar count cannot exceed 20000",
+      "passed": true
+    },
+    {
+      "name": "partial close rejects zero",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "scope": "Custom structural and example checks, not a full standards-validator run. No authenticated or trading API calls were made."
+}
