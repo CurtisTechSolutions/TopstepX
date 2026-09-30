@@ -1,0 +1,50 @@
+[package]
+name = "topstepx"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.88"
+description = "Async Rust SDK for the ProjectX Gateway API (TopstepX): REST client and SignalR realtime hubs"
+license = "GPL-3.0-only"
+repository = "https://github.com/CurtisTechSolutions/TopstepX"
+readme = "README.md"
+keywords = ["topstepx", "projectx", "trading", "futures", "signalr"]
+categories = ["api-bindings", "finance", "asynchronous"]
+
+[features]
+default = ["rustls", "realtime"]
+## TLS via rustls (reqwest's default provider and the platform verifier; native roots for WebSockets).
+rustls = ["reqwest/rustls", "tokio-tungstenite?/rustls-tls-native-roots"]
+## TLS via the platform's native TLS library.
+native-tls = ["reqwest/native-tls", "tokio-tungstenite?/native-tls"]
+## SignalR user and market hubs.
+realtime = ["dep:tokio-tungstenite", "dep:futures-util"]
+
+[dependencies]
+base64 = "0.23"
+chrono = { version = "0.4.45", default-features = false, features = ["clock", "serde", "std"] }
+futures-util = { version = "0.3.34", default-features = false, features = ["sink", "std"], optional = true }
+reqwest = { version = "0.13.5", default-features = false, features = ["json", "charset", "http2", "system-proxy"] }
+rust_decimal = { version = "1.43", default-features = false, features = ["serde", "serde-with-float", "std"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+thiserror = "2.0.21"
+tokio = { version = "1.53", features = ["sync", "time", "macros", "rt"] }
+tokio-tungstenite = { version = "0.30", default-features = false, features = ["connect"], optional = true }
+tracing = "0.1.44"
+url = "2.5.8"
+
+[dev-dependencies]
+tokio = { version = "1.53", features = ["full", "test-util"] }
+wiremock = "0.6.5"
+
+[[example]]
+name = "realtime_user"
+required-features = ["realtime"]
+
+[[example]]
+name = "realtime_market"
+required-features = ["realtime"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
