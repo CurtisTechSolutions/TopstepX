@@ -3,7 +3,7 @@ package topstepx
 import "time"
 
 // Version is the SDK version, also sent in the default User-Agent.
-const Version = "0.1.0" // x-release-please-version
+const Version = "1.0.0" // x-release-please-version
 
 // Default configuration values from the cross-SDK contract (section 2).
 const (
