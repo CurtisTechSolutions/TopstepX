@@ -583,6 +583,113 @@ func TestRefreshMarginValidateFailure(t *testing.T) {
 	}
 }
 
+// fakeClock is a manually advanced clock for Client.now.
+type fakeClock struct {
+	mu  sync.Mutex
+	now time.Time
+}
+
+func (f *fakeClock) Now() time.Time {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.now
+}
+
+func (f *fakeClock) Advance(d time.Duration) {
+	f.mu.Lock()
+	f.now = f.now.Add(d)
+	f.mu.Unlock()
+}
+
+// After a failed renewal that keeps the current token, validate is not called
+// again for RenewalCooldown; storing a new token clears the cooldown.
+func TestRenewalCooldown(t *testing.T) {
+	old := makeJWT(time.Now().Add(10*time.Minute), "old")
+	m := newMockServer(t)
+	m.handle("/api/Auth/validate", status(http.StatusInternalServerError, ""))
+	m.handle("/api/Account/search", okJSON(accountsOK))
+	c := m.client(t, WithToken(old))
+	clock := &fakeClock{now: time.Now()}
+	c.now = clock.Now
+	ctx := context.Background()
+	search := func(wantValidates int) {
+		t.Helper()
+		if _, err := c.Accounts.Search(ctx, true); err != nil {
+			t.Fatal(err)
+		}
+		if got := m.count("/api/Auth/validate"); got != wantValidates {
+			t.Fatalf("validate calls = %d, want %d", got, wantValidates)
+		}
+		if got := m.last("/api/Account/search").Header.Get("Authorization"); got != "Bearer "+old {
+			t.Fatalf("search used %q, want the old token", got)
+		}
+	}
+	search(1) // renewal fails; the old token is used
+	search(1) // cooldown: no validate
+	clock.Advance(59 * time.Second)
+	search(1)
+	clock.Advance(2 * time.Second) // 61 s after the failure
+	search(2)                      // tries again, fails, restarts the cooldown
+	search(2)
+
+	// Storing a new token clears the cooldown: an explicit Validate that
+	// succeeds stores a token that is still inside the refresh margin, and
+	// the next request renews it again at once.
+	renewed := makeJWT(clock.Now().Add(20*time.Minute), "renewed")
+	m.handle("/api/Auth/validate", okJSON(`{"success":true,"errorCode":0,"newToken":"`+renewed+`"}`))
+	if tok, err := c.Auth.Validate(ctx); err != nil || tok != renewed {
+		t.Fatalf("Validate = %q, %v", tok, err)
+	}
+	if got := m.count("/api/Auth/validate"); got != 3 {
+		t.Fatalf("validate calls = %d, want 3", got)
+	}
+	if _, err := c.Accounts.Search(ctx, true); err != nil {
+		t.Fatal(err)
+	}
+	if got := m.count("/api/Auth/validate"); got != 4 {
+		t.Fatalf("validate calls = %d, want 4 (the new token has no cooldown)", got)
+	}
+}
+
+func TestRenewalCooldownAfterFailedRelogin(t *testing.T) {
+	old := makeJWT(time.Now().Add(10*time.Minute), "old")
+	m := newMockServer(t)
+	m.handle("/api/Auth/validate", status(http.StatusInternalServerError, ""))
+	m.handle("/api/Auth/loginKey", okJSON(`{"success":false,"errorCode":8,"errorMessage":"try later"}`))
+	m.handle("/api/Account/search", okJSON(accountsOK))
+	c := m.client(t, WithToken(old), WithCredentials("user", "key"))
+	clock := &fakeClock{now: time.Now()}
+	c.now = clock.Now
+	ctx := context.Background()
+	for i := 0; i < 2; i++ {
+		if _, err := c.Accounts.Search(ctx, true); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if v, l := m.count("/api/Auth/validate"), m.count("/api/Auth/loginKey"); v != 1 || l != 1 {
+		t.Fatalf("validate %d, login %d; want 1 each during the cooldown", v, l)
+	}
+	if got := m.last("/api/Account/search").Header.Get("Authorization"); got != "Bearer "+old {
+		t.Fatalf("search used %q", got)
+	}
+	clock.Advance(RenewalCooldown + time.Second)
+	if _, err := c.Accounts.Search(ctx, true); err != nil {
+		t.Fatal(err)
+	}
+	if v, l := m.count("/api/Auth/validate"), m.count("/api/Auth/loginKey"); v != 2 || l != 2 {
+		t.Fatalf("validate %d, login %d; want 2 each after the cooldown", v, l)
+	}
+	// Once the token has expired, the client logs in again whatever the cooldown.
+	m.handleLogin(makeJWT(time.Now().Add(24*time.Hour), "fresh"))
+	clock.Advance(10 * time.Minute)
+	if _, err := c.Accounts.Search(ctx, true); err != nil {
+		t.Fatal(err)
+	}
+	if v, l := m.count("/api/Auth/validate"), m.count("/api/Auth/loginKey"); v != 2 || l != 3 {
+		t.Fatalf("validate %d, login %d; want a login and no validate after expiry", v, l)
+	}
+}
+
 func TestExpiredToken(t *testing.T) {
 	expired := makeJWT(time.Now().Add(-time.Minute), "expired")
 

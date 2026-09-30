@@ -37,6 +37,10 @@ type session struct {
 	token  string
 	expiry time.Time
 	flight *flight // the refresh or login in progress, if any
+	// renewBlockedUntil is the end of the renewal cooldown: after a failed
+	// renewal that kept the current token, validate is not called again
+	// before this time.
+	renewBlockedUntil time.Time
 }
 
 // String redacts the session.
@@ -60,6 +64,7 @@ func (s *session) store(token string, now time.Time) {
 	}
 	s.mu.Lock()
 	s.token, s.expiry = token, exp
+	s.renewBlockedUntil = time.Time{} // a new token clears the cooldown
 	s.mu.Unlock()
 }
 
@@ -71,7 +76,7 @@ func (s *session) current() string {
 
 func (s *session) clear() {
 	s.mu.Lock()
-	s.token, s.expiry = "", time.Time{}
+	s.token, s.expiry, s.renewBlockedUntil = "", time.Time{}, time.Time{}
 	s.mu.Unlock()
 }
 
@@ -83,8 +88,18 @@ func (s *session) invalidate(token string) bool {
 	if token == "" || s.token != token {
 		return false
 	}
-	s.token, s.expiry = "", time.Time{}
+	s.token, s.expiry, s.renewBlockedUntil = "", time.Time{}, time.Time{}
 	return true
+}
+
+// blockRenewal starts the renewal cooldown for token, unless another token
+// was stored meanwhile.
+func (s *session) blockRenewal(token string, until time.Time) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.token == token {
+		s.renewBlockedUntil = until
+	}
 }
 
 // runFlightLocked runs fn as the session's single in-flight refresh, or, when
@@ -165,6 +180,9 @@ func (s *session) decideLocked(now time.Time, margin time.Duration) tokenAction 
 		// tolerates clock skew.
 		return actUse
 	case !now.Before(s.expiry.Add(-margin)):
+		if now.Before(s.renewBlockedUntil) {
+			return actUse // renewal cooldown after a failed renewal
+		}
 		return actValidate
 	default:
 		return actUse
@@ -232,11 +250,15 @@ func (c *Client) refresh(ctx context.Context, act tokenAction) error {
 	}
 	c.logger.Warn("topstepx: token renewal through validate failed", "error", err)
 	if s.creds == nil {
-		return nil // keep using the current, still-valid token
+		// Keep using the current, still-valid token, and do not call
+		// validate again before the cooldown ends.
+		s.blockRenewal(token, c.now().Add(RenewalCooldown))
+		return nil
 	}
 	if lerr := c.loginWithCredentials(ctx); lerr != nil {
 		if ctx.Err() == nil && c.now().Before(expiry) {
-			c.logger.Warn("topstepx: re-login failed; keeping the current token until it expires", "error", lerr)
+			c.logger.Warn("topstepx: re-login failed; keeping the current token", "retryIn", RenewalCooldown, "error", lerr)
+			s.blockRenewal(token, c.now().Add(RenewalCooldown))
 			return nil
 		}
 		return lerr

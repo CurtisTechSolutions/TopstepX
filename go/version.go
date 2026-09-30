@@ -30,4 +30,7 @@ const (
 	DefaultRefreshMargin = time.Hour
 	// DefaultTokenLifetime is assumed for tokens without a decodable JWT exp claim.
 	DefaultTokenLifetime = 24 * time.Hour
+	// RenewalCooldown is how long the client waits before calling validate
+	// again after a failed renewal left it using the current token.
+	RenewalCooldown = 60 * time.Second
 )

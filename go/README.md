@@ -104,6 +104,12 @@ Before every authenticated request the client runs *ensure-token*:
    keep using the current, still-valid token.
 4. Otherwise use the stored token.
 
+**Renewal cooldown**: when a renewal fails and the client keeps using the current token
+(step 3 without credentials, or with credentials when the re-login fails too), it does not
+call `Auth_Validate` again for 60 seconds (`topstepx.RenewalCooldown`). It uses the token
+as-is until the cooldown ends or the token expires, so a failing validate is not repeated
+before every request during the last hour. Storing any new token clears the cooldown.
+
 Expiry comes from the JWT `exp` claim (decoded, never verified); a token that is not a
 decodable JWT is assumed to last 24 hours. Refreshes are **single-flight**: concurrent
 callers wait for one login or validate instead of stampeding.
@@ -412,7 +418,8 @@ These are either Go idioms or decisions on points the contract leaves open:
   automatic re-login.
 - **Failed renewal.** When validate fails inside the refresh margin and the follow-up
   login also fails while the current token has not expired, the client logs a warning and
-  keeps using the current token instead of failing the request.
+  keeps using the current token instead of failing the request; the renewal cooldown then
+  applies as in step 3 without credentials.
 - **HTTP 401 without credentials**: if another caller replaced the token meanwhile, the
   request is still retried once with the new token.
 - **Supersets**: `ProblemDetails` is parsed for every non-2xx status, not only 400; decimal

@@ -197,6 +197,42 @@ def test_refresh_http_failure_without_credentials_keeps_current_token(
     assert h.client.token == current
 
 
+def test_failed_renewal_without_credentials_cools_down_for_60_seconds(
+    make: Any, api: MockAPI
+) -> None:
+    start = time.time()
+    token = make_jwt(start + 600)  # expires in 10 minutes: inside the refresh margin
+    api.on("/api/Auth/validate", httpx.Response(500))
+    h = make(token=token)
+    now = [start]
+    h.client._core.clock = lambda: now[0]
+
+    h.run(lambda c: c.accounts.search())
+    h.run(lambda c: c.accounts.search())
+    assert api.paths() == ["/api/Auth/validate", "/api/Account/search", "/api/Account/search"]
+    assert [bearer(r) for r in api.calls("/api/Account/search")] == [token, token]
+
+    now[0] += 61  # the cooldown is over: renewal is attempted again
+    h.run(lambda c: c.accounts.search())
+    assert api.paths()[3:] == ["/api/Auth/validate", "/api/Account/search"]
+    assert bearer(api.requests[-1]) == token
+
+
+def test_storing_a_new_token_clears_the_renewal_cooldown(make: Any, api: MockAPI) -> None:
+    start = time.time()
+    api.on("/api/Auth/validate", httpx.Response(500))
+    h = make(token=make_jwt(start + 600))
+    h.client._core.clock = lambda: start
+    h.run(lambda c: c.accounts.search())
+    assert api.paths() == ["/api/Auth/validate", "/api/Account/search"]
+
+    replacement = make_jwt(start + 300, jti="new")  # also inside the margin
+    h.client._core.store_token(replacement)
+    h.run(lambda c: c.accounts.search())
+    assert api.paths()[2:] == ["/api/Auth/validate", "/api/Account/search"]
+    assert bearer(api.requests[-1]) == replacement
+
+
 def test_refresh_without_new_token_counts_as_failure(make: Any, api: MockAPI) -> None:
     current = fresh_token(lifetime=60)
     api.on("/api/Auth/validate", envelope(newToken=""))

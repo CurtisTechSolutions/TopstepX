@@ -67,6 +67,17 @@ def test_plan_token_table() -> None:
     assert plan_token(valid, now, margin, True) is TokenAction.USE
 
 
+def test_plan_token_respects_the_renewal_cooldown() -> None:
+    now, margin = 10_000.0, 3600.0
+    blocked = Session("t", 0, now + 600, 1, renewal_blocked_until=now + 60)
+    assert plan_token(blocked, now, margin, False) is TokenAction.USE
+    assert plan_token(blocked, now + 59.9, margin, False) is TokenAction.USE
+    assert plan_token(blocked, now + 60, margin, False) is TokenAction.VALIDATE
+    assert plan_token(blocked, now + 600, margin, False) is TokenAction.USE  # expired: step 2
+    assert plan_token(blocked, now + 600, margin, True) is TokenAction.LOGIN
+    assert new_session("fresh", now, 2).renewal_blocked_until is None
+
+
 def test_secrets_are_redacted_from_reprs() -> None:
     credentials = Credentials("user", "super-secret-key")
     session = Session("secret-token-value", 1.0, 2.0, 3)
