@@ -147,7 +147,7 @@ absent arrays decode as "none" or empty. The body is parsed as JSON whatever the
   success.
 - **`logout()`** calls the endpoint, then clears the stored token whatever the result.
   A business failure is still raised. A later authenticated call logs in again if
-  credentials are configured.
+  credentials are configured. Without a stored token, `logout()` is a no-op.
 - The client exposes the current token through an accessor that runs `ensure_token()`.
   The realtime hubs use this accessor as their token provider.
 
@@ -160,7 +160,8 @@ absent arrays decode as "none" or empty. The body is parsed as JSON whatever the
   documented for them.
 - `Status_Ping` is a GET. The response may be `text/plain` (`pong`) or a JSON string
   (`"pong"`). Return the plain string in both cases. Attach the bearer token when one is
-  held or obtainable; otherwise ping anonymously rather than failing, because anonymous
+  held or obtainable. If obtaining one fails for any reason other than cancellation,
+  including a failed login, ping anonymously rather than failing, because anonymous
   access is unverified either way.
 - Error mapping for non-2xx responses:
   - **400**: HTTP status error with the body text. When the body is RFC 7807
@@ -366,6 +367,11 @@ directly, without depending on a SignalR library:
   policy is configurable, and zero attempts disables reconnect. Each attempt fetches a
   **fresh token** from the token provider. A close without `allowReconnect` ends the
   connection.
+- **Rejected tokens**: when the WebSocket upgrade is rejected with HTTP 401, the attempt
+  reports the rejected token to the token provider. A provider backed by the REST client
+  discards that token if it is still the stored one, so the next attempt logs in again
+  instead of reusing it until expiry. This applies to the initial connect and to
+  reconnects.
 - **Pending invocations** fail with a *connection lost* error when the connection drops.
 - **Subscription registry**: a successful `Subscribe*` is recorded, de-duplicated by
   (method, arguments). A successful `Unsubscribe*` removes the entry. After every

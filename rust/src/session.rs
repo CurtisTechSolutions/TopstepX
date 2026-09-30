@@ -106,6 +106,23 @@ impl Session {
             .write()
             .unwrap_or_else(|poisoned| poisoned.into_inner()) = None;
     }
+
+    /// Clears the stored token only if it is still `token`; returns whether it did.
+    pub(crate) fn clear_if(&self, token: &str) -> bool {
+        let mut state = self
+            .state
+            .write()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        if state
+            .as_ref()
+            .is_some_and(|current| &*current.token == token)
+        {
+            *state = None;
+            true
+        } else {
+            false
+        }
+    }
 }
 
 /// Reads the `exp` claim of a JWT without verifying its signature.

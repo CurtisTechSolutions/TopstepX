@@ -12,14 +12,17 @@ use tokio::net::TcpListener;
 use tokio::sync::{broadcast, mpsc};
 use tokio::time::timeout;
 use tokio_tungstenite::tungstenite::handshake::server::{ErrorResponse, Request, Response};
+use tokio_tungstenite::tungstenite::http::StatusCode;
 use tokio_tungstenite::tungstenite::Message;
 use topstepx::enums::{DomType, OrderStatus, TradeLogType};
 use topstepx::realtime::{
     ConnectionEvent, ConnectionState, HubOptions, MarketEvent, MarketHub, RealtimeError,
     ReconnectPolicy, TokenProvider, UnknownEvent, UserEvent, UserHub,
 };
-use topstepx::Error;
+use topstepx::{Client, Error};
 use url::Url;
+use wiremock::matchers::path;
+use wiremock::{Mock, MockServer, ResponseTemplate};
 
 const RS: char = '\u{1e}';
 const WAIT: Duration = Duration::from_secs(5);
@@ -55,6 +58,8 @@ struct HubConfig {
     after_handshake: Option<String>,
     /// Stops accepting connections after this many.
     max_connections: Option<usize>,
+    /// Connection indices whose WebSocket upgrade is refused with HTTP 401.
+    reject_connections: Vec<usize>,
 }
 
 struct MockHub {
@@ -164,6 +169,7 @@ async fn serve(
 ) {
     let seen: Arc<Mutex<(Option<String>, Option<String>)>> = Arc::default();
     let capture = seen.clone();
+    let reject = config.reject_connections.contains(&index);
     let callback =
         move |request: &Request, response: Response| -> Result<Response, ErrorResponse> {
             let url = Url::parse(&format!("ws://localhost{}", request.uri())).unwrap();
@@ -176,6 +182,11 @@ async fn serve(
                 .get("authorization")
                 .map(|v| v.to_str().unwrap().to_owned());
             *capture.lock().unwrap() = (token, authorization);
+            if reject {
+                let mut refusal = ErrorResponse::new(Some("token rejected".into()));
+                *refusal.status_mut() = StatusCode::UNAUTHORIZED;
+                return Err(refusal);
+            }
             Ok(response)
         };
     let Ok(ws) = tokio_tungstenite::accept_hdr_async(stream, callback).await else {
@@ -755,4 +766,114 @@ async fn dropping_every_handle_closes_the_connection() {
         next_event(&mut events).await,
         UserEvent::Connection(ConnectionEvent::Closed { cause: None })
     );
+}
+
+/// A REST mock whose loginKey hands out `token-1`, then `token-2` for every later login.
+async fn rest_issuing_tokens() -> MockServer {
+    let rest = MockServer::start().await;
+    let login = |token: &str| {
+        ResponseTemplate::new(200).set_body_json(json!({
+            "success": true, "errorCode": 0, "errorMessage": null, "token": token
+        }))
+    };
+    Mock::given(path("/api/Auth/loginKey"))
+        .respond_with(login("token-1"))
+        .up_to_n_times(1)
+        .with_priority(1)
+        .mount(&rest)
+        .await;
+    Mock::given(path("/api/Auth/loginKey"))
+        .respond_with(login("token-2"))
+        .mount(&rest)
+        .await;
+    rest
+}
+
+fn client_for(rest: &MockServer, hub: &MockHub) -> Client {
+    Client::builder()
+        .base_url(rest.uri())
+        .user_hub_url(hub.url().as_str())
+        .credentials("trader", "key")
+        .disable_rate_limiting()
+        .build()
+        .unwrap()
+}
+
+async fn login_count(rest: &MockServer) -> usize {
+    rest.received_requests()
+        .await
+        .unwrap()
+        .iter()
+        .filter(|r| r.url.path() == "/api/Auth/loginKey")
+        .count()
+}
+
+#[tokio::test]
+async fn rejected_token_is_discarded_before_the_next_connect() {
+    let rest = rest_issuing_tokens().await;
+    let mut server = MockHub::start(HubConfig {
+        reject_connections: vec![0],
+        ..HubConfig::default()
+    })
+    .await;
+    let client = client_for(&rest, &server);
+
+    let err = client
+        .connect_user_hub_with(fast_options())
+        .await
+        .unwrap_err();
+    assert!(
+        matches!(
+            err,
+            Error::Realtime(RealtimeError::UpgradeRejected { status: 401, .. })
+        ),
+        "{err:?}"
+    );
+    assert!(!err.to_string().contains("token-1"), "{err}");
+    assert!(!client.has_token(), "the rejected token was discarded");
+
+    let hub = client.connect_user_hub_with(fast_options()).await.unwrap();
+    let (index, token, _) = server.expect_connected().await;
+    assert_eq!((index, token.as_deref()), (1, Some("token-2")));
+    assert_eq!(login_count(&rest).await, 2);
+    hub.close().await;
+}
+
+#[tokio::test]
+async fn reconnect_logs_in_again_after_a_rejected_token() {
+    let rest = rest_issuing_tokens().await;
+    let mut server = MockHub::start(HubConfig {
+        reject_connections: vec![1],
+        ..HubConfig::default()
+    })
+    .await;
+    let client = client_for(&rest, &server);
+
+    let hub = client.connect_user_hub_with(fast_options()).await.unwrap();
+    let (first, token, _) = server.expect_connected().await;
+    assert_eq!(token.as_deref(), Some("token-1"));
+    let mut events = hub.events();
+
+    server.drop_connection(first);
+    // Attempt 1 (connection 1) is refused with 401; attempt 2 must use a new login.
+    let (index, token, _) = loop {
+        if let ServerEvent::Connected {
+            index,
+            access_token,
+            authorization,
+        } = server.next().await
+        {
+            break (index, access_token, authorization);
+        }
+    };
+    assert_eq!((index, token.as_deref()), (2, Some("token-2")));
+    loop {
+        match next_event(&mut events).await {
+            UserEvent::Connection(ConnectionEvent::Reconnected) => break,
+            UserEvent::Connection(_) => continue,
+            other => panic!("unexpected {other:?}"),
+        }
+    }
+    assert_eq!(login_count(&rest).await, 2);
+    hub.close().await;
 }

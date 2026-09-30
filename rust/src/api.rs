@@ -76,15 +76,13 @@ impl Auth<'_> {
     }
 
     /// Ends the session (`POST /api/Auth/logout`) and forgets the stored token, even when
-    /// the call fails. The effect on other sessions is not documented.
+    /// the call fails. Without a stored token this is a no-op. The effect on other sessions
+    /// is not documented.
     pub async fn logout(&self) -> Result<()> {
         let _guard = self.client.inner.session.refresh.lock().await;
-        let state = self
-            .client
-            .inner
-            .session
-            .current()
-            .ok_or(Error::NotAuthenticated)?;
+        let Some(state) = self.client.inner.session.current() else {
+            return Ok(());
+        };
         let result = self
             .client
             .request_json::<LogoutResponse>(

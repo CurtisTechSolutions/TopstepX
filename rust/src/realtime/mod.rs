@@ -162,6 +162,15 @@ pub enum RealtimeError {
     /// The hub URL is unusable.
     #[error("invalid hub URL: {0}")]
     Url(String),
+    /// The server refused the WebSocket upgrade with an HTTP status; 401 means the token was
+    /// rejected (and was reported to the [`TokenProvider`]).
+    #[error("{url} refused the WebSocket upgrade with HTTP {status}")]
+    UpgradeRejected {
+        /// Hub URL (without the access token).
+        url: String,
+        /// HTTP status of the refusal.
+        status: u16,
+    },
 }
 
 /// Reconnection schedule. The default retries forever: immediately, then after 1, 2, 5 and 10
@@ -292,10 +301,19 @@ impl HubOptions {
 }
 
 type TokenFn = dyn Fn() -> BoxFuture<'static, Result<String>> + Send + Sync;
+type RejectFn = dyn Fn(&str) + Send + Sync;
 
 /// Supplies an access token for each connection attempt.
+///
+/// When the hub rejects a token (HTTP 401 on the WebSocket upgrade), the provider's
+/// [`on_rejected`](Self::on_rejected) callback is told, so the source can stop handing out
+/// that token. [`from_client`](Self::from_client) wires this to
+/// [`Client::invalidate_token`], so the next attempt logs in again.
 #[derive(Clone)]
-pub struct TokenProvider(Arc<TokenFn>);
+pub struct TokenProvider {
+    fetch: Arc<TokenFn>,
+    on_rejected: Option<Arc<RejectFn>>,
+}
 
 impl fmt::Debug for TokenProvider {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -310,7 +328,10 @@ impl TokenProvider {
         F: Fn() -> Fut + Send + Sync + 'static,
         Fut: Future<Output = Result<String>> + Send + 'static,
     {
-        TokenProvider(Arc::new(move || Box::pin(provider())))
+        TokenProvider {
+            fetch: Arc::new(move || Box::pin(provider())),
+            on_rejected: None,
+        }
     }
 
     /// Always returns `token`. Reconnects fail once it expires.
@@ -322,17 +343,42 @@ impl TokenProvider {
         })
     }
 
-    /// Uses [`Client::token`], which logs in or renews the session as needed.
+    /// Uses [`Client::token`], which logs in or renews the session as needed. A token the
+    /// hub rejects is discarded with [`Client::invalidate_token`].
     pub fn from_client(client: &Client) -> Self {
-        let client = client.clone();
+        let fetching = client.clone();
+        let rejecting = client.clone();
         TokenProvider::new(move || {
-            let client = client.clone();
+            let client = fetching.clone();
             async move { client.token().await }
+        })
+        .on_rejected(move |token| {
+            if rejecting.invalidate_token(token) {
+                tracing::info!(
+                    "the hub rejected the session token; logging in again on the next attempt"
+                );
+            }
         })
     }
 
+    /// Registers a callback that receives a token the hub rejected with HTTP 401.
+    #[must_use]
+    pub fn on_rejected<F>(mut self, callback: F) -> Self
+    where
+        F: Fn(&str) + Send + Sync + 'static,
+    {
+        self.on_rejected = Some(Arc::new(callback));
+        self
+    }
+
     pub(crate) fn token(&self) -> BoxFuture<'static, Result<String>> {
-        (self.0)()
+        (self.fetch)()
+    }
+
+    pub(crate) fn reject(&self, token: &str) {
+        if let Some(callback) = &self.on_rejected {
+            callback(token);
+        }
     }
 }
 

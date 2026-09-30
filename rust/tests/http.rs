@@ -694,3 +694,40 @@ async fn client_side_rate_limiter_spaces_requests() {
         started.elapsed()
     );
 }
+
+#[tokio::test]
+async fn logout_without_a_token_is_a_no_op() {
+    let server = MockServer::start().await;
+    let client = Client::builder().base_url(server.uri()).build().unwrap();
+    client.auth().logout().await.unwrap();
+    assert!(server.received_requests().await.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn ping_goes_anonymous_when_login_fails() {
+    let server = MockServer::start().await;
+    Mock::given(path("/api/Auth/loginKey"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": false, "errorCode": 3, "errorMessage": null, "token": null
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(path("/api/Status/ping"))
+        .respond_with(ResponseTemplate::new(200).set_body_raw("pong", "text/plain"))
+        .mount(&server)
+        .await;
+
+    let client = builder(&server).build().unwrap();
+    assert_eq!(client.status().ping().await.unwrap(), "pong");
+    let ping = &requests_to(&server, "/api/Status/ping").await[0];
+    assert!(!ping.headers.contains_key("authorization"));
+}
+
+#[tokio::test]
+async fn invalidate_token_only_discards_a_matching_token() {
+    let client = Client::builder().token("current").build().unwrap();
+    assert!(!client.invalidate_token("older"));
+    assert!(client.has_token());
+    assert!(client.invalidate_token("current"));
+    assert!(!client.has_token());
+}

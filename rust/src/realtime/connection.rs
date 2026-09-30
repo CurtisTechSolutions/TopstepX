@@ -13,7 +13,7 @@ use tokio::time::{sleep_until, timeout, timeout_at, Instant};
 use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tokio_tungstenite::tungstenite::http::header::{HeaderValue, AUTHORIZATION};
 use tokio_tungstenite::tungstenite::protocol::CloseFrame;
-use tokio_tungstenite::tungstenite::Message;
+use tokio_tungstenite::tungstenite::{Error as WsError, Message};
 use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
 use url::Url;
 
@@ -103,7 +103,13 @@ async fn open(
         .map_err(|_| RealtimeError::Timeout {
             what: "the WebSocket connection".into(),
         })?
-        .map_err(|err| connect_error(err.to_string()))?;
+        .map_err(|err| match err {
+            WsError::Http(response) => RealtimeError::UpgradeRejected {
+                url: hub_label(hub),
+                status: response.status().as_u16(),
+            },
+            other => connect_error(other.to_string()),
+        })?;
 
     ws.send(Message::text(protocol::HANDSHAKE_REQUEST))
         .await
@@ -147,6 +153,24 @@ async fn open(
             });
         }
     }
+}
+
+/// Fetches a token and opens a socket. A token refused with HTTP 401 is reported to the
+/// provider so the next attempt does not reuse it.
+async fn establish(
+    hub: &Url,
+    tokens: &TokenProvider,
+    handshake_timeout: Duration,
+) -> Result<Socket, RealtimeError> {
+    let token = tokens
+        .token()
+        .await
+        .map_err(|err| RealtimeError::Token(err.to_string()))?;
+    let result = open(hub, &token, handshake_timeout).await;
+    if let Err(RealtimeError::UpgradeRejected { status: 401, .. }) = &result {
+        tokens.reject(&token);
+    }
+    result
 }
 
 fn close_reason(frame: Option<CloseFrame>) -> String {
@@ -197,11 +221,7 @@ impl<E: HubEvent> Connection<E> {
         tokens: TokenProvider,
         options: HubOptions,
     ) -> Result<Self, RealtimeError> {
-        let token = tokens
-            .token()
-            .await
-            .map_err(|err| RealtimeError::Token(err.to_string()))?;
-        let socket = open(&url, &token, options.handshake_timeout).await?;
+        let socket = establish(&url, &tokens, options.handshake_timeout).await?;
         tracing::debug!(hub = %hub_label(&url), "hub connected");
 
         let (command_tx, command_rx) = mpsc::unbounded_channel();
@@ -631,13 +651,7 @@ impl<E: HubEvent> Driver<E> {
                 self.tokens.clone(),
                 self.options.handshake_timeout,
             );
-            let connect = async move {
-                let token = tokens
-                    .token()
-                    .await
-                    .map_err(|err| RealtimeError::Token(err.to_string()))?;
-                open(&url, &token, handshake_timeout).await
-            };
+            let connect = async move { establish(&url, &tokens, handshake_timeout).await };
             tokio::pin!(connect);
             let result = loop {
                 tokio::select! {

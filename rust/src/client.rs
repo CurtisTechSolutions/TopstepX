@@ -192,6 +192,15 @@ impl Client {
         self.inner.session.clear();
     }
 
+    /// Discards the stored token if it is still `token`, for example because another
+    /// service rejected it. The next authenticated call then logs in again when credentials
+    /// are configured. Returns whether the token was discarded.
+    ///
+    /// The realtime hubs call this when the WebSocket upgrade is rejected with HTTP 401.
+    pub fn invalidate_token(&self, token: &str) -> bool {
+        self.inner.session.clear_if(token)
+    }
+
     /// Whether a token is stored (it may be expired).
     pub fn has_token(&self) -> bool {
         self.inner.session.current().is_some()
@@ -302,11 +311,19 @@ impl Client {
         }
     }
 
-    async fn optional_token(&self) -> Result<Option<TokenState>> {
+    /// The session token when one is held or obtainable; `None` means "send anonymously".
+    /// Any failure, including a failed login, falls back to anonymous (`Status_Ping`).
+    async fn optional_token(&self) -> Option<TokenState> {
         if self.inner.session.current().is_none() && self.inner.credentials.is_none() {
-            return Ok(None);
+            return None;
         }
-        self.ensure_token().await.map(Some)
+        match self.ensure_token().await {
+            Ok(state) => Some(state),
+            Err(error) => {
+                tracing::debug!(%error, "no token available; sending anonymously");
+                None
+            }
+        }
     }
 
     /// Logs in and stores the token. The caller holds the refresh lock.
@@ -414,7 +431,7 @@ impl Client {
                 return Self::authorized(operation, self.send(operation, body, Some(token)).await?);
             }
             AuthMode::Session => Some(self.ensure_token().await?),
-            AuthMode::Optional => self.optional_token().await?,
+            AuthMode::Optional => self.optional_token().await,
         };
         let Some(token) = token else {
             return Self::authorized(operation, self.send(operation, body, None).await?);

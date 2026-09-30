@@ -73,8 +73,10 @@ async fn main() -> topstepx::Result<()> {
 * **HTTP 401:** with credentials, the client logs in again and retries the request once.
 * **Explicit calls:** `client.auth().login_key(user, key)`, `.validate()`, `.logout()`, and
   `.login_app(..)`. The current authentication guide does not support `login_app`, so prefer
-  API keys. `client.token()` returns a valid token for your own connections. You can also
-  start from an existing token with `ClientBuilder::token`.
+  API keys. `logout()` always forgets the stored token and is a no-op when none is stored.
+* **Your own connections:** `client.token()` returns a valid token. If another service
+  rejects that token, `client.invalidate_token(&token)` discards it so the next call logs in
+  again. You can also start from an existing token with `ClientBuilder::token`.
 * Debug output redacts the API key and every token.
 
 ## REST operations
@@ -173,6 +175,10 @@ loop {
   every 30 s, indefinitely. Each attempt gets a fresh token. Active subscriptions are
   replayed before `Reconnected` is emitted. Everything is configurable through
   `HubOptions` and `ReconnectPolicy`.
+* **Rejected tokens:** if the hub refuses the WebSocket upgrade with HTTP 401, the token is
+  reported to the `TokenProvider`. The client-backed provider discards it, so the next
+  attempt logs in again instead of reusing it until expiry. Custom providers can react
+  through `TokenProvider::on_rejected`.
 * **Closing:** `hub.close()` closes cleanly, as does dropping every clone of the hub.
 * **Payloads:** the models follow the official realtime guide's event tables, which the REST
   specification does not cover. Every non-identifier field is `Option`. User-hub payloads
@@ -192,7 +198,7 @@ loop {
 | `Transport`, `Decode`, `MissingData` | Network failure; a body that is not the expected JSON; a successful response missing required data |
 | `InvalidRequest` | Rejected by client-side validation before any I/O |
 | `NotAuthenticated`, `Config` | No token and no credentials; invalid builder settings |
-| `Realtime(RealtimeError)` | Hub connection, handshake, invocation or timeout failures |
+| `Realtime(RealtimeError)` | Hub failures: `Connect`, `UpgradeRejected { status }` (HTTP refusal of the WebSocket upgrade), `Handshake`, `Invocation`, `NotConnected`, `ConnectionLost`, `Closed`, `Timeout` |
 
 ## Retries and rate limits
 
@@ -238,7 +244,7 @@ disabled with `validate_requests(false)`:
 
 * `loginApp`, `logout`, `Order/searchById`, `Order/v2/query` and `Status/ping` appear only in
   Swagger, and their runtime availability is unverified. `ping` sends a token when one is
-  available and otherwise goes anonymous.
+  held or obtainable. When there is none, or the login fails, it goes anonymous.
 * `Order.update_timestamp` is optional here, although the specification marks it required,
   so a `null` cannot break decoding.
 * Bar fields `d` and `k` are undocumented and exposed raw.
